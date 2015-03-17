@@ -1,0 +1,27 @@
+C:\Users\Admin\AppData\Local\Temporary Projects\WindowsApplication1\bin\Debug\WindowsApplication1.exe.config
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\bin\Debug\WindowsApplication1.exe.config
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\Debug\Interop.wwMaterialLib.dll
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\bin\Debug\WindowsApplication1.exe
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\bin\Debug\WindowsApplication1.pdb
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\bin\Debug\WindowsApplication1.xml
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\Debug\WindowsApplication1.Resources.resources
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\Debug\WindowsApplication1.exe
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\Debug\WindowsApplication1.xml
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\Debug\WindowsApplication1.pdb
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\Debug\InBatchMaterialRecipeSync.vbproj.ResolveComReference.cache
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\Debug\InBatchMaterialRecipeSync.vbprojResolveAssemblyReference.cache
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\Debug\WindowsApplication1.Main.resources
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\Debug\InBatchMaterialRecipeSync.vbproj.GenerateResource.Cache
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\bin\Debug\WindowsApplication1.exe.config
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\Debug\Interop.wwMaterialLib.dll
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\Debug\InBatchMaterialRecipeSync.vbproj.ResolveComReference.cache
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\Debug\WindowsApplication1.exe
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\Debug\WindowsApplication1.xml
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\Debug\WindowsApplication1.pdb
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\bin\Debug\WindowsApplication1.exe
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\bin\Debug\WindowsApplication1.pdb
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\bin\Debug\WindowsApplication1.xml
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\Debug\InBatchMaterialRecipeSync.vbprojResolveAssemblyReference.cache
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\Debug\WindowsApplication1.Main.resources
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\Debug\WindowsApplication1.Resources.resources
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\Debug\InBatchMaterialRecipeSync.vbproj.GenerateResource.Cache

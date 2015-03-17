@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "InBatchMaterialRecipeSync", "InBatchMaterialRecipeSync\InBatchMaterialRecipeSync.vbproj", "{98086CB7-11EC-4949-8984-71956FDBB83E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Debug|Any CPU.Build.0 = Debug|x86
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Debug|x64.ActiveCfg = Debug|x64
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Debug|x64.Build.0 = Debug|x64
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Debug|x86.ActiveCfg = Debug|x86
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Debug|x86.Build.0 = Debug|x86
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Release|x64.ActiveCfg = Release|x64
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Release|x64.Build.0 = Release|x64
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Release|x86.ActiveCfg = Release|x86
+		{98086CB7-11EC-4949-8984-71956FDBB83E}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

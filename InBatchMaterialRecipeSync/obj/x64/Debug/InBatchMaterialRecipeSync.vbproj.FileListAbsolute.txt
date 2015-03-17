@@ -1,0 +1,15 @@
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\bin\x64\Debug\WindowsApplication1.exe.config
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\x64\Debug\Interop.wwMaterialLib.dll
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\WindowsApplication1\obj\x64\Debug\WindowsApplication1.vbproj.ResolveComReference.cache
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\bin\x64\Debug\WindowsApplication1.exe.config
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x64\Debug\Interop.wwMaterialLib.dll
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x64\Debug\InBatchMaterialRecipeSync.vbproj.ResolveComReference.cache
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\bin\x64\Debug\WindowsApplication1.exe
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\bin\x64\Debug\WindowsApplication1.pdb
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\bin\x64\Debug\WindowsApplication1.xml
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x64\Debug\WindowsApplication1.Main.resources
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x64\Debug\WindowsApplication1.Resources.resources
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x64\Debug\InBatchMaterialRecipeSync.vbproj.GenerateResource.Cache
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x64\Debug\WindowsApplication1.exe
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x64\Debug\WindowsApplication1.xml
+C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x64\Debug\WindowsApplication1.pdb
