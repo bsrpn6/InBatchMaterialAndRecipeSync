@@ -140,12 +140,6 @@
     <Compile Include="Component1.vb">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="FileSelectDialog.Designer.vb">
-      <DependentUpon>FileSelectDialog.vb</DependentUpon>
-    </Compile>
-    <Compile Include="FileSelectDialog.vb">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="Main.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -170,9 +164,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="FileSelectDialog.resx">
-      <DependentUpon>FileSelectDialog.vb</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.vb</DependentUpon>
     </EmbeddedResource>

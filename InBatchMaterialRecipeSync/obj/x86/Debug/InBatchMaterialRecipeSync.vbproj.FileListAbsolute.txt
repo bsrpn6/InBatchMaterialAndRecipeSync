@@ -25,3 +25,17 @@ C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatch
 C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\bin\x86\Debug\RecipeEdit.exe
 C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x86\Debug\InBatchMaterialRecipeSync.vbprojResolveAssemblyReference.cache
 C:\Users\Admin\Documents\Visual Studio 2012\Projects\WindowsApplication1\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.FileSelectDialog.resources
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\bin\x86\Debug\WindowsApplication1.exe.config
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\Interop.wwMaterialLib.dll
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatchMaterialRecipeSync.vbproj.ResolveComReference.cache
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.exe
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.xml
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.pdb
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\bin\x86\Debug\WindowsApplication1.exe
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\bin\x86\Debug\WindowsApplication1.pdb
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\bin\x86\Debug\WindowsApplication1.xml
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\bin\x86\Debug\RecipeEdit.exe
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatchMaterialRecipeSync.vbprojResolveAssemblyReference.cache
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.Main.resources
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.Resources.resources
+C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatchMaterialRecipeSync.vbproj.GenerateResource.Cache

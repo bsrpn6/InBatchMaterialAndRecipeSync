@@ -11,8 +11,13 @@
         fd.RestoreDirectory = True
 
         If fd.ShowDialog() = DialogResult.OK Then
-            Main.ImportFilename = fd.FileName
-            ImportFileTxtBox.Text = Main.ImportFilename
+            If Main.MaterialOrRecipe = True Then
+                Main.MatExportFilename = fd.FileName
+                ImportFileTxtBox.Text = Main.MatExportFilename
+            ElseIf Main.MaterialOrRecipe = False Then
+                Main.RecipeExportFilename = fd.FileName
+                ImportFileTxtBox.Text = Main.RecipeExportFilename
+            End If
         End If
 
     End Sub
@@ -28,8 +33,13 @@
         fd.RestoreDirectory = True
 
         If fd.ShowDialog() = DialogResult.OK Then
-            Main.ComparisonFileName = fd.FileName
-            FileCompareTxtBox.Text = Main.ComparisonFileName
+            If Main.MaterialOrRecipe = True Then
+                Main.MatComparisonFileName = fd.FileName
+                FileCompareTxtBox.Text = Main.MatComparisonFileName
+            ElseIf Main.MaterialOrRecipe = False Then
+                Main.RecipeComparisonFileName = fd.FileName
+                FileCompareTxtBox.Text = Main.RecipeComparisonFileName
+            End If
         End If
 
     End Sub
@@ -41,9 +51,14 @@
     End Sub
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles Me.Load
-
-        If Main.ComparisonFileName <> Nothing Then
-            FileCompareTxtBox.Text = Main.ComparisonFileName
+        If Main.MaterialOrRecipe = True Then
+            If Main.MatComparisonFileName <> Nothing Then
+                FileCompareTxtBox.Text = Main.MatComparisonFileName
+            End If
+        ElseIf Main.MaterialOrRecipe = False Then
+            If Main.MatComparisonFileName <> Nothing Then
+                FileCompareTxtBox.Text = Main.RecipeComparisonFileName
+            End If
         End If
 
         CenterToParent()
