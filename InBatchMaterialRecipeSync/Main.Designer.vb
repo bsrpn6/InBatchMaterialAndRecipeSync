@@ -86,9 +86,9 @@ Partial Class Main
         '
         Me.MaterialsToAddLbl.BackColor = System.Drawing.Color.Gray
         Me.MaterialsToAddLbl.Font = New System.Drawing.Font("Microsoft Sans Serif", 21.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.MaterialsToAddLbl.Location = New System.Drawing.Point(287, 196)
+        Me.MaterialsToAddLbl.Location = New System.Drawing.Point(290, 196)
         Me.MaterialsToAddLbl.Name = "MaterialsToAddLbl"
-        Me.MaterialsToAddLbl.Size = New System.Drawing.Size(805, 33)
+        Me.MaterialsToAddLbl.Size = New System.Drawing.Size(799, 33)
         Me.MaterialsToAddLbl.TabIndex = 6
         Me.MaterialsToAddLbl.Text = "Materials To Add"
         Me.MaterialsToAddLbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter
@@ -120,9 +120,9 @@ Partial Class Main
         '
         Me.RecipesToAddLbl.BackColor = System.Drawing.Color.Gray
         Me.RecipesToAddLbl.Font = New System.Drawing.Font("Microsoft Sans Serif", 21.75!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.RecipesToAddLbl.Location = New System.Drawing.Point(287, 447)
+        Me.RecipesToAddLbl.Location = New System.Drawing.Point(290, 447)
         Me.RecipesToAddLbl.Name = "RecipesToAddLbl"
-        Me.RecipesToAddLbl.Size = New System.Drawing.Size(805, 33)
+        Me.RecipesToAddLbl.Size = New System.Drawing.Size(799, 33)
         Me.RecipesToAddLbl.TabIndex = 18
         Me.RecipesToAddLbl.Text = "Recipes To Add"
         Me.RecipesToAddLbl.TextAlign = System.Drawing.ContentAlignment.MiddleCenter

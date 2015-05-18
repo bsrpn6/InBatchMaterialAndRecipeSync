@@ -12,6 +12,9 @@ Public Class Main
     Public RecipeExportFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\SavedRecipeExport.txt"
     Public RecipeComparisonFileName As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\SavedRecipeExportForImport.txt"
 
+    Dim RecipercpExportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\RecipeRCPExport"
+    Dim RecipeRCPCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A"
+
     'Delcaration of API variable objects and types
     Private oMaterialDB As wwMaterialLib.IMaterialDB
     Private iMaterials As wwMaterialLib.IMaterials
@@ -52,6 +55,11 @@ Public Class Main
             MessageBox.Show("Error with oMaterialDB.")
         End If
 
+        'If folder to copy to doesn't exist, create it
+        If Not Directory.Exists(RecipercpExportPath) Then
+            Directory.CreateDirectory(RecipercpExportPath)
+        End If
+
         CenterToScreen()
 
     End Sub
@@ -69,7 +77,6 @@ Public Class Main
         If (Not File.Exists(MatExportFilename)) Then
             fs = File.Create(MatExportFilename)
             Using fs
-
             End Using
         End If
 
@@ -111,7 +118,6 @@ Public Class Main
         If (Not File.Exists(MatComparisonFileName)) Then
             fs = File.Create(MatComparisonFileName)
             Using fs
-
             End Using
         End If
 
@@ -431,6 +437,8 @@ Public Class Main
         'Create file if doesn't exist.
         If (Not File.Exists(RecipeExportFilename)) Then
             fs = File.Create(RecipeExportFilename)
+            Using fs
+            End Using
         End If
 
         'Get recipes using InBatch API
@@ -489,6 +497,8 @@ Public Class Main
         'Create file if doesn't exist
         If (Not File.Exists(RecipeComparisonFileName)) Then
             fs = File.Create(RecipeComparisonFileName)
+            Using fs
+            End Using
         End If
 
         'Get recipes
@@ -533,17 +543,8 @@ Public Class Main
 
     Private Sub CopyRecipes()
 
-        'Copy recipes from Config_A folder to InBatch Sync Folder
-        Dim RecipercpExportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\RecipercpExport"
-        Dim RecipercpCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A"
-
-        'If folder to copy to doesn't exist, create it
-        If Not Directory.Exists(RecipercpCopyPath) Then
-            Directory.CreateDirectory(RecipercpCopyPath)
-        End If
-
         'For each file of type rcp copy to copy directory
-        For Each f In Directory.GetFiles(RecipercpCopyPath, "*.rcp", SearchOption.TopDirectoryOnly)
+        For Each f In Directory.GetFiles(RecipeRCPCopyPath, "*.rcp", SearchOption.TopDirectoryOnly)
             If File.Exists(f) Then
                 'Copy then delete file
                 File.Copy(f, Path.Combine(RecipercpExportPath, Path.GetFileName(f)), True)
@@ -581,7 +582,7 @@ Public Class Main
         Dim ReturnValue As Integer
         'Path where the RecipeExport method delivers exported files and where we want to copy them to.
         Dim RecipercpExportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\RecipercpExport\"
-        Dim RecipercpCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\"
+        Dim RecipeRCPCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\"
 
         Dim i As Integer = 0
         Dim j As Integer = 0
@@ -592,7 +593,7 @@ Public Class Main
         If RecipeExport.Rows.Count > 0 Then
             For Each row As DataRow In RecipeExport.Rows
 
-                File.Copy(RecipercpExportPath & row.Item(0).ToString & ".rcp", RecipercpCopyPath & row.Item(0).ToString & ".rcp", True)
+                File.Copy(RecipercpExportPath & row.Item(0).ToString & ".rcp", RecipeRCPCopyPath & row.Item(0).ToString & ".rcp", True)
                 'ReturnValue = oRecipeDB.ImportRecipe("0358255.rcp", True)
                 ReturnValue = oRecipeDB.ImportRecipe(row.Item(0).ToString & ".rcp", 1)
                 If ReturnValue = True Then
@@ -612,6 +613,9 @@ Public Class Main
     Private Sub AddRecipeConflicts()
 
         Dim ReturnValue As Integer
+        'Path where the RecipeExport method delivers exported files and where we want to copy them to.
+        Dim RecipercpExportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\RecipercpExport\"
+        Dim RecipeRCPCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\"
 
         Dim i As Integer = 0
         Dim j As Integer = 0
@@ -622,11 +626,11 @@ Public Class Main
         If RecipeConflicts.Rows.Count > 0 Then
             For Each row As DataRow In RecipeConflicts.Rows
                 If row.Item(row.Table.Columns("Import").Ordinal) = True Then
-
+                    File.Copy(RecipercpExportPath & row.Item(0).ToString & ".rcp", RecipeRCPCopyPath & row.Item(0).ToString & ".rcp", True)
                     ReturnValue = oRecipeDB.ImportRecipe("C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\RecipeRCPExport\" & row.Item(0).ToString & ".rcp", 1)
-                    If ReturnValue = 1 Then
+                    If ReturnValue = True Then
                         j += 1
-                    ElseIf ReturnValue = 0 Then
+                    ElseIf ReturnValue = False Then
                         k += 1
                     End If
                     i += 1
