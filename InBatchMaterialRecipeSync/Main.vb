@@ -1,19 +1,24 @@
-﻿Imports System
-Imports System.IO
+﻿Imports System.IO
 Imports System.Text
-Imports System.Collections.Generic
+Imports System.Xml
 
 Public Class Main
 
     'File path variables
-    Public MatExportFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\SavedMaterialExport.txt"
-    Public MatComparisonFileName As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\SavedMaterialExportForImport.txt"
+    Public MaterialExportFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Export\SavedMaterialExport.csv"
+    Public MaterialImportFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\SavedMaterialImport.csv"
+    Public MaterialImportLogFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\MaterialLog.csv"
 
-    Public RecipeExportFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\SavedRecipeExport.txt"
-    Public RecipeComparisonFileName As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\SavedRecipeExportForImport.txt"
+    Public RecipeExportFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Export\SavedRecipeExport.csv"
+    Public RecipeExportFormulaFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Export\SavedRecipeFormulaExport.csv"
+    Public RecipeXMLExportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Export\RecipeXMLExport"
 
-    Dim RecipercpExportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\RecipeRCPExport"
-    Dim RecipeRCPCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A"
+    Public RecipeImportFileName As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\SavedRecipeImport.csv"
+    Public RecipeImportFormulaFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\SavedRecipeFormulaImport.csv"
+    Public RecipeXMLImportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\RecipeXMLImport"
+    Public RecipeImportLogFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\RecipeLog.csv"
+
+    Dim RecipeXMLCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A"
 
     'Delcaration of API variable objects and types
     Private oMaterialDB As wwMaterialLib.IMaterialDB
@@ -24,17 +29,15 @@ Public Class Main
     Dim oMaterialClassType As System.Type
 
     'Delcaration of DataTables used to load information from CSVs and for maintain information for imports
-    Dim MatExport As DataTable = New DataTable()
-    Dim MatComparison As DataTable = New DataTable()
-    Dim RecipeExport As DataTable = New DataTable()
-    Dim RecipeComparison As DataTable = New DataTable()
-    Dim RecipeConflicts As DataTable = New DataTable()
+    Dim MaterialImport As DataTable = New DataTable()
+    Dim RecipeImportIDCrossReference As DataTable = New DataTable()
+    Dim RecipeImportMaterialCrossReference As DataTable = New DataTable()
+    Dim RecipeImportFormula As DataTable = New DataTable()
 
     'Progress Bars
     Dim ProgressBar1 As ProgressBar
-    Dim ProgressBar2 As ProgressBar
 
-    'Host server name
+    'InBatch Host server name
     Dim BatchServerHostName As String = "localhost"
 
     Private Sub Main_Load(sender As Object, e As EventArgs) Handles Me.Load
@@ -56,14 +59,85 @@ Public Class Main
         End If
 
         'If folder to copy to doesn't exist, create it
-        If Not Directory.Exists(RecipercpExportPath) Then
-            Directory.CreateDirectory(RecipercpExportPath)
+        If Not Directory.Exists(RecipeXMLExportPath) Then
+            Directory.CreateDirectory(RecipeXMLExportPath)
         End If
 
         CenterToScreen()
 
     End Sub
 
+    'Start Material Export
+    Private Sub GetMaterialsCmdBtn_Click(sender As Object, e As EventArgs) Handles GetMaterialsCmdBtn.Click
+
+        'Export materials to CSV file
+        GetMaterialExport()
+
+        MessageBox.Show("Completed")
+    End Sub
+
+    'Start Recipe Export
+    Private Sub GetRecipeCmdBtn_Click(sender As Object, e As EventArgs) Handles GetRecipeCmdBtn.Click
+
+        'Export recipes - exports recipe XML files to Config_A folder, writes Recipe Header inforamtion
+        'to CSV file, and writes Recipe Formula information to another CSV file
+        ExportRecipes()
+
+        'Copy XML files from default Config_A directory to IB_Export folder
+        CopyRecipeXMLExport()
+
+        'Write CSV file with all exported recipe information
+        WriteExportRecipeFile()
+
+        'Write CSV file with all recipe formula information
+        WriteExportRecipeFormulaFile()
+
+        MessageBox.Show("Completed")
+    End Sub
+
+    'Start Material Import
+    Private Sub ImportNewMaterialsCmdBtn_Click(sender As Object, e As EventArgs) Handles ImportNewMaterialsCmdBtn.Click
+
+        'Load materials cross reference of old ID numbers vs new ID numbers into a datatable for faster access
+        LoadRecipeImportMaterialCrossReference()
+
+        'Load RecipeImportFormula - used strictly for progress bar incrementing at this time
+        LoadRecipeImportFormula()
+
+        'Modify XML files
+        ModifyXMLImportMaterialsAndSave()
+
+        'Perform import.
+        AddMaterials()
+
+        MessageBox.Show("Completed")
+
+    End Sub
+
+    'Start Recipe Import
+    Private Sub ImportNewRecipesCmdBtn_Click(sender As Object, e As EventArgs) Handles ImportNewRecipesCmdBtn.Click
+        'Load recipe cross reference of old ID numbers vs new ID numbers
+        LoadRecipeImportIDCrossReference()
+
+        'Modify XML files and save to Config_A folder
+        ModifyXMLImportRecipeIDAndSave()
+
+        'Add new recipes (recipes that don't exist in local export file but do in source)
+        ImportRecipes()
+
+        MessageBox.Show("Completed")
+
+    End Sub
+
+    'Close Application
+    Private Sub CloseCmdBtn_Click(sender As Object, e As EventArgs) Handles CloseCmdBtn.Click
+
+        'Close application
+        Application.Exit()
+
+    End Sub
+
+    'Uses wwMaterialLib.wwMaterial to write material information to CSV file
     Private Sub GetMaterialExport()
 
         Dim Mats As wwMaterialLib.wwMaterials
@@ -74,8 +148,8 @@ Public Class Main
         Dim sb As New StringBuilder
 
         'Creates file if doesn't exist
-        If (Not File.Exists(MatExportFilename)) Then
-            fs = File.Create(MatExportFilename)
+        If (Not File.Exists(MaterialExportFilename)) Then
+            fs = File.Create(MaterialExportFilename)
             Using fs
             End Using
         End If
@@ -86,345 +160,44 @@ Public Class Main
         Mats = oMaterialDB.Materials
         Dim n As Integer = 1
 
+        'Progress bar
+        ProgressBar1 = New ProgressBar
+        ProgressBar1.Location = New Point(166, 307)
+        ProgressBar1.Minimum = 0
+        ProgressBar1.Maximum = (Mats.Count)
+        ProgressBar1.Width = 362
+        ProgressBar1.Height = 30
+        ProgressBar1.ForeColor = Color.Navy
+
+        Me.Controls.Add(ProgressBar1)
+        ProgressBar1.BringToFront()
+
         'Write materials to CSV file
-        Using outfile As New StreamWriter(MatExportFilename)
+        Using outfile As New StreamWriter(MaterialExportFilename)
+            outfile.WriteLine("ID" & "," & "Name" & "," & "Type" & "," & "Description" & "," & "UnitOfMeasure" & "," & "HiDev" & "," & "LoDev")
+
             For Each Material In Mats
                 outfile.Write(Mats.Item(n).ID.ToString & ",")
-                outfile.Write(Mats.Item(n).Name.ToString & ",")
-                outfile.Write(Mats.Item(n).Description.ToString & ",")
-                outfile.Write(Mats.Item(n).Type.ToString & ",")
+                outfile.Write(Mats.Item(n).Name.ToString.Replace(",", "^") & ",")
+                outfile.Write(Mats.Item(n).Type.ToString.Replace(",", "^") & ",")
+                outfile.Write(Mats.Item(n).Description.ToString.Replace(",", "^") & ",")
                 outfile.Write(Mats.Item(n).UnitOfMeasure.ToString & ",")
                 outfile.Write(Mats.Item(n).HiDev.ToString & ",")
-                outfile.Write(Mats.Item(n).LoDev.ToString & ",")
-                outfile.Write("*")
+                outfile.Write(Mats.Item(n).LoDev.ToString)
                 outfile.WriteLine()
 
                 n += 1
+
+                ProgressBar1.Value = ProgressBar1.Value + 1
             Next
+
         End Using
 
-    End Sub
-
-    Private Sub GetMaterialExportForImport()
-
-        Dim Mats As wwMaterialLib.wwMaterials
-        Dim Material As wwMaterialLib.wwMaterial
-
-        'Create FileStream and StringBuilder
-        Dim fs As FileStream = Nothing
-        Dim sb As New StringBuilder
-
-        'Creates file if doesn't exist.
-        If (Not File.Exists(MatComparisonFileName)) Then
-            fs = File.Create(MatComparisonFileName)
-            Using fs
-            End Using
-        End If
-
-        'Queries to retrieve information using WonderWare API.
-        oMaterialDB.QueryMaterialsByType(wwMaterialLib.wwMtrlTypeEnum.wwTypeIngredient)
-
-        Mats = oMaterialDB.Materials
-        Dim n As Integer = 1
-
-        'Writes materials to CSV file
-        Using outfile As New StreamWriter(MatComparisonFileName)
-            For Each Material In Mats
-                outfile.Write(Mats.Item(n).ID.ToString & ",")
-                outfile.Write(Mats.Item(n).Name.ToString & ",")
-                outfile.Write(Mats.Item(n).Description.ToString & ",")
-                outfile.Write(Mats.Item(n).Type.ToString & ",")
-                outfile.Write(Mats.Item(n).UnitOfMeasure.ToString & ",")
-                outfile.Write(Mats.Item(n).HiDev.ToString & ",")
-                outfile.Write(Mats.Item(n).LoDev.ToString & ",")
-                outfile.Write("*")
-                outfile.WriteLine()
-
-                n += 1
-            Next
-        End Using
+        Me.Controls.Remove(ProgressBar1)
 
     End Sub
 
-    Private Sub LoadMaterialsFromParent()
-
-        MatExport.Clear()
-
-        'Create StreamReader
-        Dim SR As StreamReader = New StreamReader(MatExportFilename)
-
-        'Reads CSV file into arrays split by ","
-        Dim i As Long = 0
-        Dim line As String = SR.ReadLine
-        Dim strArray As String() = line.Split(",")
-
-        Dim row As DataRow
-
-        For Each s As String In strArray
-            MatExport.Columns.Add(New DataColumn())
-        Next
-
-        'Adds split arrays as rows into DataTable RecipeExport
-        Do
-            line = SR.ReadLine
-            If Not line = Nothing Then
-                row = MatExport.NewRow
-                row.ItemArray = line.Split(",")
-                MatExport.Rows.Add(row)
-            Else
-                Exit Do
-            End If
-        Loop
-
-    End Sub
-
-    Private Sub LoadRecipesFromParent()
-
-        RecipeExport.Clear()
-
-        'Create StreamReader
-        Dim SR As StreamReader = New StreamReader(RecipeExportFilename)
-
-        'Reads CSV file into arrays split by ","
-        Dim i As Long = 0
-        Dim line As String = SR.ReadLine
-        Dim strArray As String() = line.Split(",")
-
-        Dim row As DataRow
-
-        For Each s As String In strArray
-            RecipeExport.Columns.Add(New DataColumn())
-        Next
-
-        'Adds split arrays as rows into DataTable RecipeExport
-        Do
-            line = SR.ReadLine
-            If Not line = Nothing Then
-                row = RecipeExport.NewRow
-                row.ItemArray = line.Split(",")
-                RecipeExport.Rows.Add(row)
-            Else
-                Exit Do
-            End If
-        Loop
-
-    End Sub
-
-    Private Sub LoadMaterialsFromChild()
-
-        MatComparison.Clear()
-
-        'Create StreamReader
-        Dim SR As StreamReader = New StreamReader(MatComparisonFileName)
-
-        'Reads CSV file into arrays split by ","
-        Dim i As Long = 0
-        Dim line As String = SR.ReadLine
-        Dim strArray As String() = line.Split(",")
-
-        Dim row As DataRow
-
-        For Each s As String In strArray
-            MatComparison.Columns.Add(New DataColumn())
-        Next
-
-        'Adds split arrays as rows into DataTable MatComparison
-        Do
-            line = SR.ReadLine
-            If Not line = Nothing Then
-                row = MatComparison.NewRow
-                row.ItemArray = line.Split(",")
-                MatComparison.Rows.Add(row)
-            Else
-                Exit Do
-            End If
-        Loop
-
-    End Sub
-
-    Private Sub LoadRecipesFromChild()
-
-        RecipeComparison.Clear()
-
-        'Create Streamreader
-        Dim SR As StreamReader = New StreamReader(RecipeComparisonFileName)
-
-        'Reads CSV file into arrays split by ","
-        Dim i As Long = 0
-        Dim line As String = SR.ReadLine
-        Dim strArray As String() = line.Split(",")
-
-        Dim row As DataRow
-
-        For Each s As String In strArray
-            RecipeComparison.Columns.Add(New DataColumn())
-        Next
-
-        'Adds split arrays as rows into DataTable RecipeComparison
-        Do
-            line = SR.ReadLine
-            If Not line = Nothing Then
-                row = RecipeComparison.NewRow
-                row.ItemArray = line.Split(",")
-                RecipeComparison.Rows.Add(row)
-            Else
-                Exit Do
-            End If
-        Loop
-
-    End Sub
-
-    Private Sub MaterialsToAdd()
-
-        'Queries to find materials that need to be added.
-        'Deletes matching records, leaving behind only new materials in the MatExport DataTable.
-        Dim RowsToDelete = From r1 In MatExport.AsEnumerable _
-                       Join r2 In MatComparison.AsEnumerable _
-                       On r1.Field(Of String)("Column1").ToString Equals r2.Field(Of String)("Column1").ToString _
-                       Select r1
-
-        For Each row As DataRow In RowsToDelete.ToArray
-            row.Delete()
-        Next
-
-        If MatExport.Rows.Count > 0 Then 'New materials exist that need added
-            MaterialsToAddLbl.Visible = False
-            DataGridView1.DataSource = MatExport
-            MaterialsToAddLbl.BackColor = SystemColors.AppWorkspace
-            DataGridView1.BackgroundColor = Color.Gray
-        Else 'No new materials were found
-            DataGridView1.DataSource = Nothing
-            MaterialsToAddLbl.Visible = True
-            MaterialsToAddLbl.Text = "NO NEW MATERIALS TO ADD"
-            MaterialsToAddLbl.BackColor = Color.Green
-            DataGridView1.BackgroundColor = Color.Green
-        End If
-
-    End Sub
-
-    Private Sub RecipesToAdd()
-
-        Dim i As Integer = 0
-        Dim j As Integer = 0
-        Dim k As Integer = 0
-
-        'Strips matching recipes leaving only unsynced recipes, i.e., those that exist in source but not in host.
-        'This DataTable is used to automatically add these "new" recipes.
-        Dim RowsToDelete = From r1 In RecipeExport.AsEnumerable _
-                       Join r2 In RecipeComparison.AsEnumerable _
-                       On r1.Field(Of String)("Column1").ToString Equals r2.Field(Of String)("Column1").ToString _
-                       Select r1
-
-        For Each row As DataRow In RowsToDelete.ToArray
-            row.Delete()
-        Next
-
-    End Sub
-
-    Private Sub RecipesConflicts()
-
-        RecipeConflicts.Clear()
-
-        'Queries to find matching rows.
-        Dim MatchingRows = From r1 In RecipeExport.AsEnumerable _
-                       Join r2 In RecipeComparison.AsEnumerable _
-                       On r1.Field(Of String)("Column1").ToString Equals r2.Field(Of String)("Column1").ToString _
-                       Select r1
-
-        'Matching rows are added to the RecipeConflicts DataTable to be used later.
-        RecipeConflicts = MatchingRows.CopyToDataTable
-
-        If RecipeConflicts.Rows.Count > 0 Then 'Conflicts to exist
-            RecipesToAddLbl.Visible = False
-
-            'Adds the column to the DataTable to allow user selection of which recipes should be overwritten.
-            Dim columnn As DataColumn = RecipeConflicts.Columns.Add("Import", Type.GetType("System.Boolean"))
-            columnn.ReadOnly = False
-            For Each row In RecipeConflicts.Rows
-                row.Item(row.Table.Columns("Import").Ordinal) = False
-            Next
-
-            DataGridView2.DataSource = RecipeConflicts
-            RecipesToAddLbl.BackColor = SystemColors.AppWorkspace
-            DataGridView2.BackgroundColor = Color.Gray
-            ImportRecipesCmdBtn.Enabled = True
-            ImportRecipesCmdBtn.BackColor = SystemColors.Control
-            ImportRecipesCmdBtn.Visible = True
-        Else 'No conflicts found
-            DataGridView2.DataSource = Nothing
-            RecipesToAddLbl.Visible = True
-            RecipesToAddLbl.Text = "NO CONFLICTS"
-            RecipesToAddLbl.BackColor = Color.Green
-            DataGridView2.BackgroundColor = Color.Green
-            ImportRecipesCmdBtn.Enabled = False
-            ImportRecipesCmdBtn.BackColor = SystemColors.ControlDark
-            ImportRecipesCmdBtn.Visible = False
-        End If
-
-    End Sub
-
-    Private Sub AddMaterials()
-
-        Dim ReturnValue As Integer
-        Dim i As Integer = 0
-        Dim j As Integer = 0
-
-        'Adds materials that were designated to exist from the source but not in the host.
-        'MatExport is stripped of matching materials in the MaterialsToAdd method
-        For Each row As DataRow In MatExport.Rows
-            ReturnValue = oMaterialDB.AddMaterial(row.Item(0), row.Item(1), row.Item(2), row.Item(3), row.Item(4), row.Item(5), row.Item(6))
-            If ReturnValue = 0 Then
-                i += 1
-            Else
-                j += 1
-            End If
-        Next
-
-        MessageBox.Show("There were " & i & " materials successfully added." & vbCrLf & "There were " & j & " materials that failed.")
-
-    End Sub
-
-
-    Private Sub GetMaterialsCmdBtn_Click(sender As Object, e As EventArgs) Handles GetMaterialsCmdBtn.Click
-
-        'Reinitialize controls
-        MaterialsToAddLbl.Visible = False
-        DataGridView1.DataSource = Nothing
-
-        'Export materials
-        GetMaterialExport()
-
-        'Show success
-        MaterialsToAddLbl.Text = "Materials Successfully Exported"
-        MaterialsToAddLbl.BackColor = Color.Green
-        DataGridView1.BackgroundColor = Color.Green
-        MaterialsToAddLbl.Visible = True
-
-    End Sub
-
-    Private Sub GetRecipeCmdBtn_Click(sender As Object, e As EventArgs) Handles GetRecipeCmdBtn.Click
-
-        'Reinitialize controls
-        RecipesToAddLbl.Visible = False
-        DataGridView2.DataSource = Nothing
-
-        'Reinitialize controls
-        DataGridView2.DataSource = Nothing
-
-        'Export recipes
-        ExportRecipes()
-
-        'Copy recipes to InBatchSync folder
-        CopyRecipes()
-
-        'Show success
-        RecipesToAddLbl.Text = "Recipes Successfully Exported"
-        RecipesToAddLbl.BackColor = Color.Green
-        DataGridView2.BackgroundColor = Color.Green
-        RecipesToAddLbl.Visible = True
-
-    End Sub
-
+    'Uses oRecipeDB.ExportRecipeXML to export XML files to Config_A directory
     Private Sub ExportRecipes()
 
         Dim ReturnValue As Integer
@@ -446,10 +219,10 @@ Public Class Main
 
         'Progress bar
         ProgressBar1 = New ProgressBar
-        ProgressBar1.Location = New Point(446, 450)
+        ProgressBar1.Location = New Point(166, 307)
         ProgressBar1.Minimum = 0
-        ProgressBar1.Maximum = (aRecipes.GetUpperBound(0) * 2)
-        ProgressBar1.Width = 487
+        ProgressBar1.Maximum = (aRecipes.GetUpperBound(0) * 4)
+        ProgressBar1.Width = 362
         ProgressBar1.Height = 30
         ProgressBar1.ForeColor = Color.Navy
 
@@ -462,225 +235,433 @@ Public Class Main
         Dim k As Integer = 0
 
 
-        'Write recipe information to CSV file
+        For Each recipe In aRecipes
+            ReturnValue = oRecipeDB.ExportRecipeXML(aRecipes(n), 1)
+
+            If ReturnValue = True Then
+                j += 1
+            ElseIf ReturnValue = False Then
+                k += 1
+            End If
+
+            n += 1
+
+            'Increment progress bar
+            ProgressBar1.Value += 1
+
+        Next
+
+    End Sub
+
+    'Copies XML files in Config_A directory to IB_Export directory
+    Private Sub CopyRecipeXMLExport()
+
+        'For each file of type XML copy to copy directory
+        For Each f In Directory.GetFiles(RecipeXMLCopyPath, "*.XML", SearchOption.TopDirectoryOnly)
+
+            If File.Exists(f) Then
+                'Copy then delete file
+                File.Copy(f, Path.Combine(RecipeXMLExportPath, Path.GetFileName(f)), True)
+                File.Delete(f)
+            End If
+            ProgressBar1.Value += 1
+
+        Next
+
+    End Sub
+
+    'Traverses through all XML files in IB_Export directory to collect recipe header information, writing to CSV file
+    Private Sub WriteExportRecipeFile()
+        Dim doc As New XmlDocument
+        Dim namespaces As XmlNamespaceManager
+
+        'Must delcare namespaces since they are part of the document...
+        namespaces = New XmlNamespaceManager(doc.NameTable)
+        namespaces.AddNamespace("xsi", "http: //www.w3.org/2001/XMLSchema-instance")
+        namespaces.AddNamespace("a", "http://www.wbf.org/xml/B2MML-V0401")
+        namespaces.AddNamespace("b", "http://www.wbf.org/xml/B2MML-V0401-AllExtensions")
+
         Using outfile As New StreamWriter(RecipeExportFilename)
 
-            For Each recipe In aRecipes
-                ReturnValue = oRecipeDB.ExportRecipe(aRecipes(n), 1)
+            outfile.WriteLine("ID" & "," & "ProductID" & "," & "ProductName" & "," & "ApprovedForProduction" & "," & "Name")
 
-                If ReturnValue = True Then
-                    j += 1
-                ElseIf ReturnValue = False Then
-                    k += 1
-                End If
-                'Write to file
-                outfile.WriteLine(aRecipes(n).ToString & "," & oRecipeDB.ProductName & "," & oRecipeDB.RecipeID & "," & oRecipeDB.RecipeName)
-                n += 1
+            'For each file of type XML copy to copy directory
+            For Each f In Directory.GetFiles(RecipeXMLExportPath, "*.XML", SearchOption.TopDirectoryOnly)
+                doc.Load(f)
+
+                Dim ID As String = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:ID", namespaces).InnerText
+                Dim ProductID As String = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:Header/a:ProductID", namespaces).InnerText
+                Dim ProductName As String = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:Header/a:ProductName", namespaces).InnerText
+                Dim ApprovedForProduction As String = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:Header/b:ApprovedForProduction", namespaces).InnerText
+                Dim Name As String = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/b:Name", namespaces).InnerText
+
+                outfile.WriteLine(ID & "," & ProductID & "," & ProductName & "," & ApprovedForProduction & "," & Name)
 
                 'Increment progress bar
                 ProgressBar1.Value += 1
+
             Next
 
         End Using
 
+    End Sub
+
+    'Traverses through all XML files in IB_Export directory to collect recipe parameter information, writing to CSV file
+    Private Sub WriteExportRecipeFormulaFile()
+        Dim doc As New XmlDocument
+        Dim namespaces As XmlNamespaceManager
+
+        'Must delcare namespaces since they are part of the document...
+        namespaces = New XmlNamespaceManager(doc.NameTable)
+        namespaces.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        namespaces.AddNamespace("a", "http://www.wbf.org/xml/B2MML-V0401")
+
+        Dim ID As String
+        Dim ParameterId As String
+        Dim ParameterType As String
+        Dim MaterialID As String
+
+        Using outfile As New StreamWriter(RecipeExportFormulaFilename)
+
+            outfile.WriteLine("ID" & "," & "ParameterID" & "," & "ParameterType" & "," & "MaterialID")
+
+            'For each file of type XML copy to copy directory
+            For Each f In Directory.GetFiles(RecipeXMLExportPath, "*.XML", SearchOption.TopDirectoryOnly)
+                doc.Load(f)
+
+                ID = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:ID", namespaces).InnerText
+
+                Dim Parameters As XmlNodeList = doc.SelectNodes("/a:BatchInformation/a:MasterRecipe/a:Formula/a:Parameter", namespaces)
+
+                For Each Parameter In Parameters
+                    ParameterType = Parameter("ParameterType").InnerText
+
+                    If ParameterType = "ProcessInput" Then
+                        ParameterId = Parameter("ID").InnerText
+                        MaterialID = Parameter("MaterialID").InnerText
+                        outfile.WriteLine(ID & "," & ParameterId & "," & ParameterType & "," & MaterialID)
+                    End If
+
+                Next
+
+                'Increment progress bar
+                ProgressBar1.Value += 1
+            Next
+        End Using
+
+        Me.Controls.Remove(ProgressBar1)
+    End Sub
+
+    'Reads in SavedMaterialImport file into datatable to be accessed through memory 
+    Private Sub LoadRecipeImportMaterialCrossReference()
+
+        RecipeImportIDCrossReference.Clear()
+
+        'Create Streamreader
+        Dim SR As StreamReader = New StreamReader(MaterialImportFilename)
+
+        'Reads CSV file into arrays split by ", "
+        Dim i As Long = 0
+        Dim line As String = SR.ReadLine
+        Dim strArray As String() = line.Split(", ")
+
+        Dim row As DataRow
+
+        For Each s As String In strArray
+            RecipeImportMaterialCrossReference.Columns.Add(New DataColumn(s, GetType(String)))
+        Next
+
+        'Adds split arrays as rows into DataTable RecipeComparison
+        Do
+            line = SR.ReadLine
+            If Not line = Nothing Then
+                row = RecipeImportMaterialCrossReference.NewRow
+                row.ItemArray = line.Split(",")
+                RecipeImportMaterialCrossReference.Rows.Add(row)
+            Else
+                Exit Do
+            End If
+        Loop
 
     End Sub
 
-    Private Sub ExportRecipesForImport()
+    'Reads in Saved
+    Private Sub LoadRecipeImportFormula()
 
-        Dim aRecipes As System.Array
+        RecipeImportFormula.Clear()
 
-        'Create FileStream and StringBuilder
-        Dim fs As FileStream = Nothing
-        Dim sb As New StringBuilder
+        'Create Streamreader
+        Dim SR As StreamReader = New StreamReader(RecipeImportFormulaFilename)
 
-        'Create file if doesn't exist
-        If (Not File.Exists(RecipeComparisonFileName)) Then
-            fs = File.Create(RecipeComparisonFileName)
-            Using fs
-            End Using
-        End If
+        'Reads CSV file into arrays split by ", "
+        Dim i As Long = 0
+        Dim line As String = SR.ReadLine
+        Dim strArray As String() = line.Split(", ")
 
-        'Get recipes
-        aRecipes = oRecipeDB.GetRecipes
+        Dim row As DataRow
+
+        For Each s As String In strArray
+            RecipeImportFormula.Columns.Add(New DataColumn(s, GetType(String)))
+        Next
+
+        'Adds split arrays as rows into DataTable RecipeComparison
+        Do
+            line = SR.ReadLine
+            If Not line = Nothing Then
+                row = RecipeImportFormula.NewRow
+                row.ItemArray = line.Split(",")
+                RecipeImportFormula.Rows.Add(row)
+            Else
+                Exit Do
+            End If
+        Loop
+
+    End Sub
+
+    'Traverses through all XML files in IB_Import\RecipeXMLImport directory, re-identifying all material IDs using pre-loaded data table.
+    Private Sub ModifyXMLImportMaterialsAndSave()
+        Dim doc As New XmlDocument
+        Dim namespaces As XmlNamespaceManager
+
+        'Must delcare namespaces since they are part of the document...
+        namespaces = New XmlNamespaceManager(doc.NameTable)
+        namespaces.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        namespaces.AddNamespace("a", "http://www.wbf.org/xml/B2MML-V0401")
+
+        Dim ParameterType As String
+        Dim RecipeID As String
+        Dim ParameterID As String
+        Dim MaterialID As String
+        Dim NewMaterialID As String = ""
+        Dim Modified As String = "False"
 
         'Progress bar
-        Dim ProgressBar1 As ProgressBar
         ProgressBar1 = New ProgressBar
-        ProgressBar1.Location = New Point(446, 450)
+        ProgressBar1.Location = New Point(166, 307)
         ProgressBar1.Minimum = 0
-        ProgressBar1.Maximum = aRecipes.GetUpperBound(0) + 1
-        ProgressBar1.Width = 487
+        ProgressBar1.Maximum = (RecipeImportFormula.Rows.Count + RecipeImportMaterialCrossReference.Rows.Count)
+        ProgressBar1.Width = 362
         ProgressBar1.Height = 30
         ProgressBar1.ForeColor = Color.Navy
 
         Me.Controls.Add(ProgressBar1)
         ProgressBar1.BringToFront()
 
-        'Counter
-        Dim n As Integer = 1
+        'For each file of type XML copy to copy directory
+        For Each f In Directory.GetFiles(RecipeXMLImportPath, "*.XML", SearchOption.TopDirectoryOnly)
+            doc.Load(f)
 
-        'Write recipe information to file
-        Using outfile As New StreamWriter(RecipeComparisonFileName)
+            RecipeID = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:ID", namespaces).InnerText
 
-            For Each recipe In aRecipes
-                If Not oRecipeDB.Open(aRecipes(n)) Then
-                    MessageBox.Show("Not open")
+            Dim Parameters As XmlNodeList = doc.SelectNodes("/a:BatchInformation/a:MasterRecipe/a:Formula/a:Parameter", namespaces)
+
+
+            For Each Parameter In Parameters
+                ParameterType = Parameter("ParameterType").InnerText
+                ParameterID = Parameter("ID").InnerText
+
+                If ParameterType = "ProcessInput" Then
+                    Modified = "False"
+
+                    MaterialID = Parameter("MaterialID").InnerText
+                    Dim NewIDRow() As DataRow = RecipeImportMaterialCrossReference.Select("ID = '" & MaterialID & "'")
+
+                    For Each row As DataRow In NewIDRow
+                        NewMaterialID = row(1)
+                        Parameter("MaterialID").InnerText = NewMaterialID
+                        Modified = "True"
+                    Next
+
+                    ProgressBar1.Value = ProgressBar1.Value + 1
+
+                    Logger(("ModifyXMLParameter" & "," & "RecipeID: " & RecipeID & "," & "ParameterID: " & ParameterID & "," & "OldMaterialID: " & MaterialID & "," & "NewMaterialID: " & NewMaterialID & "," & Modified), "Material")
+
                 End If
-                'Write to file
-                outfile.WriteLine(aRecipes(n).ToString & "," & oRecipeDB.ProductName & "," & oRecipeDB.RecipeID & "," & oRecipeDB.RecipeName)
-                n += 1
 
-                'Incremenet progress bar
-                ProgressBar1.Value = n
             Next
 
-        End Using
+            doc.Save(f)
 
-        Me.Controls.Remove(ProgressBar1)
+        Next
 
     End Sub
 
-    Private Sub CopyRecipes()
+    'Uses data table and oMaterialDB.AddMaterial method to import new materials
+    Private Sub AddMaterials()
 
-        'For each file of type rcp copy to copy directory
-        For Each f In Directory.GetFiles(RecipeRCPCopyPath, "*.rcp", SearchOption.TopDirectoryOnly)
-            If File.Exists(f) Then
-                'Copy then delete file
-                File.Copy(f, Path.Combine(RecipercpExportPath, Path.GetFileName(f)), True)
-                File.Delete(f)
+        Dim ReturnValue As Integer
+        Dim i As Integer = 0
+        Dim j As Integer = 0
+
+        'Adds materials that were designated to exist from the source but not in the host.
+        'MatExport is stripped of matching materials in the MaterialsToAdd method
+
+        For Each row As DataRow In RecipeImportMaterialCrossReference.Rows
+            ReturnValue = oMaterialDB.AddMaterial(row(1), row(2), row(4), row(3), row(5), Convert.ToDouble(row(6)), Convert.ToDouble(row(7)))
+            If ReturnValue = 0 Then
+                i += 1
+                Logger(("AddMaterials" & "," & "OldMaterialID: & " & row(0) & "," & "NewMaterialID" & row(1) & "," & "," & "," & "True"), "Material")
+            Else
+                j += 1
+                Logger(("AddMaterials" & "," & "OldMaterialID: & " & row(0) & "," & "NewMaterialID" & row(1) & "," & "," & "," & "False"), "Material")
             End If
-            ProgressBar1.Value += 1
+
+            ProgressBar1.Value = ProgressBar1.Value + 1
         Next
 
         Me.Controls.Remove(ProgressBar1)
-    End Sub
-
-    Private Sub ImportMaterialsCmdBtn_Click(sender As Object, e As EventArgs)
-
-        'Add materials that dont' exist.
-        AddMaterials()
+        MessageBox.Show("There were " & i & " materials successfully added." & vbCrLf & "There were " & j & " materials that failed.")
 
     End Sub
 
-    Private Sub CloseCmdBtn_Click(sender As Object, e As EventArgs) Handles CloseCmdBtn.Click
+    'Reads in SavedRecipeImport file into datatable to be accessed through memory
+    Private Sub LoadRecipeImportIDCrossReference()
 
-        'Close application
-        Application.Exit()
+        RecipeImportIDCrossReference.Clear()
+
+        'Create Streamreader
+        Dim SR As StreamReader = New StreamReader(RecipeImportFileName)
+
+        'Reads CSV file into arrays split by ", "
+        Dim i As Long = 0
+        Dim line As String = SR.ReadLine
+        Dim strArray As String() = line.Split(", ")
+
+        Dim row As DataRow
+
+        For Each s As String In strArray
+            RecipeImportIDCrossReference.Columns.Add(New DataColumn(s, GetType(String)))
+        Next
+
+        'Adds split arrays as rows into DataTable RecipeComparison
+        Do
+            line = SR.ReadLine
+            If Not line = Nothing Then
+                row = RecipeImportIDCrossReference.NewRow
+                row.ItemArray = line.Split(", ")
+                RecipeImportIDCrossReference.Rows.Add(row)
+            Else
+                Exit Do
+            End If
+        Loop
 
     End Sub
 
-    Private Sub ImportRecipesCmdBtn_Click(sender As Object, e As EventArgs) Handles ImportRecipesCmdBtn.Click
+    'Traverses through all XML files in IB_Import\RecipeXMLImport modifying Recipe ID and the file name
+    Private Sub ModifyXMLImportRecipeIDAndSave()
 
-        'Add selected recipes that were shown to already exist and were selected to overwrite existing by user
-        AddRecipeConflicts()
+        Dim doc As New XmlDocument
+        Dim namespaces As XmlNamespaceManager
 
-    End Sub
+        'Must delcare namespaces since they are part of the document...
+        namespaces = New XmlNamespaceManager(doc.NameTable)
+        namespaces.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        namespaces.AddNamespace("a", "http://www.wbf.org/xml/B2MML-V0401")
 
-    Private Sub AddNewRecipes()
-
-        Dim ReturnValue As Integer
-        'Path where the RecipeExport method delivers exported files and where we want to copy them to.
-        Dim RecipercpExportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\RecipercpExport\"
-        Dim RecipeRCPCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\"
+        Dim ID As String
+        Dim NewID As String = ""
 
         Dim i As Integer = 0
         Dim j As Integer = 0
         Dim k As Integer = 0
 
-        'If rows were added to query that were in the source (RecipeExport) that didn't match the host, then add them
-        'RecipeExport is stripped of all matching recipes by the RecipesToAdd method
-        If RecipeExport.Rows.Count > 0 Then
-            For Each row As DataRow In RecipeExport.Rows
+        Dim Modified As String
 
-                File.Copy(RecipercpExportPath & row.Item(0).ToString & ".rcp", RecipeRCPCopyPath & row.Item(0).ToString & ".rcp", True)
-                'ReturnValue = oRecipeDB.ImportRecipe("0358255.rcp", True)
-                ReturnValue = oRecipeDB.ImportRecipe(row.Item(0).ToString & ".rcp", 1)
-                If ReturnValue = True Then
-                    j += 1
-                ElseIf ReturnValue = False Then
-                    k += 1
-                End If
-                i += 1
+        ProgressBar1 = New ProgressBar
+        ProgressBar1.Location = New Point(166, 307)
+        ProgressBar1.Minimum = 0
+        ProgressBar1.Maximum = (Directory.GetFiles(RecipeXMLImportPath, "*.XML", SearchOption.TopDirectoryOnly).Length * 4)
+        ProgressBar1.Width = 362
+        ProgressBar1.Height = 30
+        ProgressBar1.ForeColor = Color.Navy
+
+        Me.Controls.Add(ProgressBar1)
+        ProgressBar1.BringToFront()
+
+        'Traverse through all files in IB_Import\RecipeXMLImport
+        For Each f In Directory.GetFiles(RecipeXMLImportPath, "*.XML", SearchOption.TopDirectoryOnly)
+
+            Modified = "False"
+
+            doc.Load(f)
+
+            'Find ID field in XML file
+            ID = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:ID", namespaces).InnerText
+
+            'Search for cross reference in datatable
+            Dim NewIDRow() As DataRow = RecipeImportIDCrossReference.Select("ID = '" & ID & "'")
+
+            'Write new ID value, save to Config_A with new ID name
+            For Each row As DataRow In NewIDRow
+                NewID = row(1)
+                doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:ID", namespaces).InnerText = NewID
+                doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:Header/a:ProductID", namespaces).InnerText = NewID
+                doc.Save(RecipeXMLCopyPath & "\" & NewID & ".xml")
+
+                Modified = "True"
             Next
-            MessageBox.Show("There were " & j & " recipes successfully added." & vbCrLf & "There were " & k & " recipes that failed.")
-        Else
-            MessageBox.Show("There were no new recipes to add.")
-        End If
 
+            Logger(("ModiifyXMLRecipeID" & "," & "OldRecipeID: & " & ID & "," & "New RecipeID: " & NewID & "," & Modified), "Recipe")
+
+            ProgressBar1.Value = ProgressBar1.Value + 1
+
+        Next
     End Sub
 
-    Private Sub AddRecipeConflicts()
+    'Uses oRecipeDB.ImportRecipe to import XML recipe files
+    Private Sub ImportRecipes()
 
-        Dim ReturnValue As Integer
-        'Path where the RecipeExport method delivers exported files and where we want to copy them to.
-        Dim RecipercpExportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\RecipercpExport\"
-        Dim RecipeRCPCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\"
+        Dim ReturnValue As Integer = 0
 
         Dim i As Integer = 0
         Dim j As Integer = 0
         Dim k As Integer = 0
 
-        'Adds recipes that were shown to be in conflict by a join query
-        'The recipes are selected by the user by marking them for import
-        If RecipeConflicts.Rows.Count > 0 Then
-            For Each row As DataRow In RecipeConflicts.Rows
-                If row.Item(row.Table.Columns("Import").Ordinal) = True Then
-                    File.Copy(RecipercpExportPath & row.Item(0).ToString & ".rcp", RecipeRCPCopyPath & row.Item(0).ToString & ".rcp", True)
-                    ReturnValue = oRecipeDB.ImportRecipe("C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\InBatchSync\RecipeRCPExport\" & row.Item(0).ToString & ".rcp", 1)
-                    If ReturnValue = True Then
-                        j += 1
-                    ElseIf ReturnValue = False Then
-                        k += 1
-                    End If
-                    i += 1
-                End If
-            Next
-            MessageBox.Show("There were " & j & " recipes successfully added." & vbCrLf & "There were " & k & " recipes that failed.")
-        Else
-            MessageBox.Show("There were no new recipes to add.")
+        'Traverse each XML file in Config_A directory, import each file as new Recipe. If already exists, recipe will be overwritten with new file
+        For Each f In Directory.GetFiles(RecipeXMLCopyPath, "*.XML", SearchOption.TopDirectoryOnly)
+
+            ReturnValue = oRecipeDB.ImportRecipe(Path.GetFileName(f), 1)
+
+            If ReturnValue = True Then 'Imported
+                j += 1
+                Logger(("AddRecipes" & "," & "RecipeID: " & Path.GetFileNameWithoutExtension(f) & "," & "," & "True"), "Recipe")
+            ElseIf ReturnValue = False Then 'Failed
+                k += 1
+                Logger(("AddRecipes" & "," & "RecipeID: " & Path.GetFileNameWithoutExtension(f) & "," & "," & "False"), "Recipe")
+            End If
+            i += 1
+
+            File.Delete(f)
+
+            ProgressBar1.Value = ProgressBar1.Value + 1
+        Next
+
+        MessageBox.Show("There were " & j & " recipes successfully added." & vbCrLf & "There were " & k & " recipes that failed.")
+
+        Me.Controls.Remove(ProgressBar1)
+
+
+    End Sub
+
+    'Routine used to write to MaterialLog or RecipeLog
+    Public Sub Logger(LogString As String, Item As String)
+        Dim Path As String
+
+        'Two files are created for logs, one for materials and one for recipes. Only for imports do these log files matter
+        Select Case Item
+            Case "Material"
+                Path = MaterialImportLogFilename
+            Case "Recipe"
+                Path = RecipeImportLogFilename
+            Case Else
+                Path = ""
+        End Select
+
+        If Path <> "" Then
+            Using outfile As New StreamWriter(Path, True)
+                outfile.WriteLine(LogString)
+            End Using
         End If
-
-    End Sub
-
-    Private Sub ImportNewMaterialsCmdBtn_Click(sender As Object, e As EventArgs) Handles ImportNewMaterialsCmdBtn.Click
-
-        'Get local export of materials for comparison.
-        GetMaterialExportForImport()
-
-        'Load materials from source (parent) export file.
-        LoadMaterialsFromParent()
-
-        'Load local export of materials for comparison.
-        LoadMaterialsFromChild()
-
-        'Perform comparison.
-        MaterialsToAdd()
-
-        'Perform import.
-        AddMaterials()
-
-    End Sub
-
-    Private Sub ImportNewRecipesCmdBtn_Click(sender As Object, e As EventArgs) Handles ImportNewRecipesCmdBtn.Click
-
-        'Get local export of recipies for comparison.
-        ExportRecipesForImport()
-
-        'Load recipes from source (parent) export file
-        LoadRecipesFromParent()
-
-        'Load local export of recipes for comparison.
-        LoadRecipesFromChild()
-
-        'Load conflicts (recipes that already exist).
-        RecipesConflicts()
-
-        'Perform comparison to find NEW recipes to add
-        RecipesToAdd()
-
-        'Add new recipes (recipes that don't exist in local export file but do in source).
-        AddNewRecipes()
 
     End Sub
 End Class
