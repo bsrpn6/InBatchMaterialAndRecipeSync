@@ -22,14 +22,16 @@ Partial Class Main
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
+        Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(Main))
         Me.GetMaterialsCmdBtn = New System.Windows.Forms.Button()
         Me.GetRecipeCmdBtn = New System.Windows.Forms.Button()
-        Me.Label1 = New System.Windows.Forms.Label()
+        Me.TitleLabel = New System.Windows.Forms.Label()
         Me.CloseCmdBtn = New System.Windows.Forms.Button()
         Me.ImportNewMaterialsCmdBtn = New System.Windows.Forms.Button()
         Me.ImportNewRecipesCmdBtn = New System.Windows.Forms.Button()
-        Me.Label2 = New System.Windows.Forms.Label()
-        Me.Label3 = New System.Windows.Forms.Label()
+        Me.ExportLabel = New System.Windows.Forms.Label()
+        Me.ImportLabel = New System.Windows.Forms.Label()
+        Me.StatusTextBox = New System.Windows.Forms.TextBox()
         Me.SuspendLayout()
         '
         'GetMaterialsCmdBtn
@@ -52,15 +54,15 @@ Partial Class Main
         Me.GetRecipeCmdBtn.Text = "Export Recipes"
         Me.GetRecipeCmdBtn.UseVisualStyleBackColor = True
         '
-        'Label1
+        'TitleLabel
         '
-        Me.Label1.AutoSize = True
-        Me.Label1.Font = New System.Drawing.Font("Arial", 24.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label1.Location = New System.Drawing.Point(74, 25)
-        Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(547, 37)
-        Me.Label1.TabIndex = 5
-        Me.Label1.Text = "InBatch Materials and Recipe Sync"
+        Me.TitleLabel.AutoSize = True
+        Me.TitleLabel.Font = New System.Drawing.Font("Arial", 24.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.TitleLabel.Location = New System.Drawing.Point(74, 25)
+        Me.TitleLabel.Name = "TitleLabel"
+        Me.TitleLabel.Size = New System.Drawing.Size(547, 37)
+        Me.TitleLabel.TabIndex = 5
+        Me.TitleLabel.Text = "InBatch Materials and Recipe Sync"
         '
         'CloseCmdBtn
         '
@@ -92,51 +94,65 @@ Partial Class Main
         Me.ImportNewRecipesCmdBtn.Text = "Import Recipes"
         Me.ImportNewRecipesCmdBtn.UseVisualStyleBackColor = True
         '
-        'Label2
+        'ExportLabel
         '
-        Me.Label2.AutoSize = True
-        Me.Label2.Font = New System.Drawing.Font("Arial", 24.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label2.Location = New System.Drawing.Point(129, 96)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(145, 37)
-        Me.Label2.TabIndex = 19
-        Me.Label2.Text = "EXPORT"
+        Me.ExportLabel.AutoSize = True
+        Me.ExportLabel.Font = New System.Drawing.Font("Arial", 24.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.ExportLabel.Location = New System.Drawing.Point(129, 96)
+        Me.ExportLabel.Name = "ExportLabel"
+        Me.ExportLabel.Size = New System.Drawing.Size(145, 37)
+        Me.ExportLabel.TabIndex = 19
+        Me.ExportLabel.Text = "EXPORT"
         '
-        'Label3
+        'ImportLabel
         '
-        Me.Label3.AutoSize = True
-        Me.Label3.Font = New System.Drawing.Font("Arial", 24.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Label3.Location = New System.Drawing.Point(424, 96)
-        Me.Label3.Name = "Label3"
-        Me.Label3.Size = New System.Drawing.Size(138, 37)
-        Me.Label3.TabIndex = 23
-        Me.Label3.Text = "IMPORT"
+        Me.ImportLabel.AutoSize = True
+        Me.ImportLabel.Font = New System.Drawing.Font("Arial", 24.0!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.ImportLabel.Location = New System.Drawing.Point(424, 96)
+        Me.ImportLabel.Name = "ImportLabel"
+        Me.ImportLabel.Size = New System.Drawing.Size(138, 37)
+        Me.ImportLabel.TabIndex = 23
+        Me.ImportLabel.Text = "IMPORT"
+        '
+        'StatusTextBox
+        '
+        Me.StatusTextBox.BackColor = System.Drawing.SystemColors.Control
+        Me.StatusTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None
+        Me.StatusTextBox.Font = New System.Drawing.Font("Arial", 15.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.StatusTextBox.Location = New System.Drawing.Point(12, 294)
+        Me.StatusTextBox.Name = "StatusTextBox"
+        Me.StatusTextBox.Size = New System.Drawing.Size(670, 25)
+        Me.StatusTextBox.TabIndex = 24
+        Me.StatusTextBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Main
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(694, 491)
-        Me.Controls.Add(Me.Label3)
+        Me.Controls.Add(Me.StatusTextBox)
+        Me.Controls.Add(Me.ImportLabel)
         Me.Controls.Add(Me.ImportNewRecipesCmdBtn)
         Me.Controls.Add(Me.ImportNewMaterialsCmdBtn)
-        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.ExportLabel)
         Me.Controls.Add(Me.CloseCmdBtn)
-        Me.Controls.Add(Me.Label1)
+        Me.Controls.Add(Me.TitleLabel)
         Me.Controls.Add(Me.GetRecipeCmdBtn)
         Me.Controls.Add(Me.GetMaterialsCmdBtn)
+        Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.Name = "Main"
-        Me.Text = "Main"
+        Me.Text = "InBatch Sync"
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
     End Sub
     Friend WithEvents GetMaterialsCmdBtn As System.Windows.Forms.Button
     Friend WithEvents GetRecipeCmdBtn As System.Windows.Forms.Button
-    Friend WithEvents Label1 As System.Windows.Forms.Label
+    Friend WithEvents TitleLabel As System.Windows.Forms.Label
     Friend WithEvents CloseCmdBtn As System.Windows.Forms.Button
     Friend WithEvents ImportNewMaterialsCmdBtn As System.Windows.Forms.Button
     Friend WithEvents ImportNewRecipesCmdBtn As System.Windows.Forms.Button
-    Friend WithEvents Label2 As Label
-    Friend WithEvents Label3 As Label
+    Friend WithEvents ExportLabel As Label
+    Friend WithEvents ImportLabel As Label
+    Friend WithEvents StatusTextBox As TextBox
 End Class

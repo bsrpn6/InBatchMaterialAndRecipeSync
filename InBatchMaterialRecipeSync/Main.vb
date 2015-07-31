@@ -20,15 +20,15 @@ Public Class Main
 
     Dim RecipeXMLCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A"
 
-    'Delcaration of API variable objects and types
+    'Declaration of API variable objects and types
     Private oMaterialDB As wwMaterialLib.IMaterialDB
     Private iMaterials As wwMaterialLib.IMaterials
     Private iMaterial As wwMaterialLib.IMaterial
-    Private oRecipeDB As Object
+    Private oRecipeDB As Wonderware.InBatch.RecipeEditor.wwRecipe
     Dim oRecipeClassType As System.Type
     Dim oMaterialClassType As System.Type
 
-    'Delcaration of DataTables used to load information from CSVs and for maintain information for imports
+    'Declaration of DataTables used to load information from CSVs and for maintain information for imports
     Dim MaterialImport As DataTable = New DataTable()
     Dim RecipeImportIDCrossReference As DataTable = New DataTable()
     Dim RecipeImportMaterialCrossReference As DataTable = New DataTable()
@@ -36,6 +36,8 @@ Public Class Main
 
     'Progress Bars
     Dim ProgressBar1 As ProgressBar
+    Dim NumSteps As Integer
+    Dim StatusMessage As String
 
     'InBatch Host server name
     Dim BatchServerHostName As String = "localhost"
@@ -63,6 +65,14 @@ Public Class Main
             Directory.CreateDirectory(RecipeXMLExportPath)
         End If
 
+        'ProgressBar
+        ProgressBar1 = New ProgressBar
+        ProgressBar1.Location = New Point(166, 325)
+        ProgressBar1.Minimum = 0
+        ProgressBar1.Width = 362
+        ProgressBar1.Height = 30
+        ProgressBar1.ForeColor = Color.Navy
+
         CenterToScreen()
 
     End Sub
@@ -70,14 +80,28 @@ Public Class Main
     'Start Material Export
     Private Sub GetMaterialsCmdBtn_Click(sender As Object, e As EventArgs) Handles GetMaterialsCmdBtn.Click
 
+        'Set number of steps for status message
+        NumSteps = 1
+        StatusTextBox.Text = "STARTING"
+
         'Export materials to CSV file
         GetMaterialExport()
 
+        StatusTextBox.Text = "COMPLETE"
+        StatusTextBox.Update()
+
         MessageBox.Show("Completed")
+
+        StatusTextBox.Text = ""
+        StatusTextBox.Update()
     End Sub
 
     'Start Recipe Export
     Private Sub GetRecipeCmdBtn_Click(sender As Object, e As EventArgs) Handles GetRecipeCmdBtn.Click
+
+        'Set number of steps for status message
+        NumSteps = 4
+        StatusTextBox.Text = "STARTING"
 
         'Export recipes - exports recipe XML files to Config_A folder, writes Recipe Header inforamtion
         'to CSV file, and writes Recipe Formula information to another CSV file
@@ -92,13 +116,24 @@ Public Class Main
         'Write CSV file with all recipe formula information
         WriteExportRecipeFormulaFile()
 
+        StatusTextBox.Text = "COMPLETE"
+        StatusTextBox.Update()
+
         MessageBox.Show("Completed")
+
+        StatusTextBox.Text = ""
+        StatusTextBox.Update()
+
     End Sub
 
     'Start Material Import
     Private Sub ImportNewMaterialsCmdBtn_Click(sender As Object, e As EventArgs) Handles ImportNewMaterialsCmdBtn.Click
 
-        'Load materials cross reference of old ID numbers vs new ID numbers into a datatable for faster access
+        'Set number of steps for status message
+        NumSteps = 4
+        StatusTextBox.Text = "STARTING"
+
+        'Load materials cross reference of old ID numbers vs new ID numbers into a DataTable for faster access
         LoadRecipeImportMaterialCrossReference()
 
         'Load RecipeImportFormula - used strictly for progress bar incrementing at this time
@@ -110,12 +145,23 @@ Public Class Main
         'Perform import.
         AddMaterials()
 
+        StatusTextBox.Text = "COMPLETE"
+        StatusTextBox.Update()
+
         MessageBox.Show("Completed")
+
+        StatusTextBox.Text = ""
+        StatusTextBox.Update()
 
     End Sub
 
     'Start Recipe Import
     Private Sub ImportNewRecipesCmdBtn_Click(sender As Object, e As EventArgs) Handles ImportNewRecipesCmdBtn.Click
+
+        'Set number of steps for status message
+        NumSteps = 3
+        StatusTextBox.Text = "STARTING"
+
         'Load recipe cross reference of old ID numbers vs new ID numbers
         LoadRecipeImportIDCrossReference()
 
@@ -125,7 +171,13 @@ Public Class Main
         'Add new recipes (recipes that don't exist in local export file but do in source)
         ImportRecipes()
 
+        StatusTextBox.Text = "COMPLETE"
+        StatusTextBox.Update()
+
         MessageBox.Show("Completed")
+
+        StatusTextBox.Text = ""
+        StatusTextBox.Update()
 
     End Sub
 
@@ -139,6 +191,15 @@ Public Class Main
 
     'Uses wwMaterialLib.wwMaterial to write material information to CSV file
     Private Sub GetMaterialExport()
+
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 1
+        CurrentStepDescription = "Exporting Materials To CSV"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
 
         Dim Mats As wwMaterialLib.wwMaterials
         Dim Material As wwMaterialLib.wwMaterial
@@ -161,13 +222,8 @@ Public Class Main
         Dim n As Integer = 1
 
         'Progress bar
-        ProgressBar1 = New ProgressBar
-        ProgressBar1.Location = New Point(166, 307)
-        ProgressBar1.Minimum = 0
+        ProgressBar1.Value = 0
         ProgressBar1.Maximum = (Mats.Count)
-        ProgressBar1.Width = 362
-        ProgressBar1.Height = 30
-        ProgressBar1.ForeColor = Color.Navy
 
         Me.Controls.Add(ProgressBar1)
         ProgressBar1.BringToFront()
@@ -188,7 +244,7 @@ Public Class Main
 
                 n += 1
 
-                ProgressBar1.Value = ProgressBar1.Value + 1
+                ProgressBar1.Value += 1
             Next
 
         End Using
@@ -199,6 +255,15 @@ Public Class Main
 
     'Uses oRecipeDB.ExportRecipeXML to export XML files to Config_A directory
     Private Sub ExportRecipes()
+
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 1
+        CurrentStepDescription = "Exporting Recipes to XML Files"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
 
         Dim ReturnValue As Integer
         Dim aRecipes As System.Array
@@ -218,13 +283,8 @@ Public Class Main
         aRecipes = oRecipeDB.GetRecipes
 
         'Progress bar
-        ProgressBar1 = New ProgressBar
-        ProgressBar1.Location = New Point(166, 307)
-        ProgressBar1.Minimum = 0
+        ProgressBar1.Value = 0
         ProgressBar1.Maximum = (aRecipes.GetUpperBound(0) * 4)
-        ProgressBar1.Width = 362
-        ProgressBar1.Height = 30
-        ProgressBar1.ForeColor = Color.Navy
 
         Me.Controls.Add(ProgressBar1)
         ProgressBar1.BringToFront()
@@ -256,6 +316,15 @@ Public Class Main
     'Copies XML files in Config_A directory to IB_Export directory
     Private Sub CopyRecipeXMLExport()
 
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 2
+        CurrentStepDescription = "Copying XML files from Config_A to IB_Export"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
+
         'For each file of type XML copy to copy directory
         For Each f In Directory.GetFiles(RecipeXMLCopyPath, "*.XML", SearchOption.TopDirectoryOnly)
 
@@ -264,6 +333,7 @@ Public Class Main
                 File.Copy(f, Path.Combine(RecipeXMLExportPath, Path.GetFileName(f)), True)
                 File.Delete(f)
             End If
+
             ProgressBar1.Value += 1
 
         Next
@@ -272,10 +342,20 @@ Public Class Main
 
     'Traverses through all XML files in IB_Export directory to collect recipe header information, writing to CSV file
     Private Sub WriteExportRecipeFile()
+
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 3
+        CurrentStepDescription = "Writing Recipe Header Information to CSV"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
+
         Dim doc As New XmlDocument
         Dim namespaces As XmlNamespaceManager
 
-        'Must delcare namespaces since they are part of the document...
+        'Must declare namespaces since they are part of the document...
         namespaces = New XmlNamespaceManager(doc.NameTable)
         namespaces.AddNamespace("xsi", "http: //www.w3.org/2001/XMLSchema-instance")
         namespaces.AddNamespace("a", "http://www.wbf.org/xml/B2MML-V0401")
@@ -308,10 +388,19 @@ Public Class Main
 
     'Traverses through all XML files in IB_Export directory to collect recipe parameter information, writing to CSV file
     Private Sub WriteExportRecipeFormulaFile()
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 4
+        CurrentStepDescription = "Writing Recipe Formula Information to CSV"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
+
         Dim doc As New XmlDocument
         Dim namespaces As XmlNamespaceManager
 
-        'Must delcare namespaces since they are part of the document...
+        'Must declare namespaces since they are part of the document...
         namespaces = New XmlNamespaceManager(doc.NameTable)
         namespaces.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance")
         namespaces.AddNamespace("a", "http://www.wbf.org/xml/B2MML-V0401")
@@ -352,12 +441,21 @@ Public Class Main
         Me.Controls.Remove(ProgressBar1)
     End Sub
 
-    'Reads in SavedMaterialImport file into datatable to be accessed through memory 
+    'Reads in SavedMaterialImport file into DataTable to be accessed through memory 
     Private Sub LoadRecipeImportMaterialCrossReference()
+
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 1
+        CurrentStepDescription = "Loading Recipe Header Cross Reference Table Into Memory"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
 
         RecipeImportIDCrossReference.Clear()
 
-        'Create Streamreader
+        'Create StreamReader
         Dim SR As StreamReader = New StreamReader(MaterialImportFilename)
 
         'Reads CSV file into arrays split by ", "
@@ -385,12 +483,21 @@ Public Class Main
 
     End Sub
 
-    'Reads in Saved
+    'Reads in SavedRecipeFormulaImport file into DataTable to be accessed through memory 
     Private Sub LoadRecipeImportFormula()
+
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 2
+        CurrentStepDescription = "Loading Recipe Formula Cross Reference Table Into Memory"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
 
         RecipeImportFormula.Clear()
 
-        'Create Streamreader
+        'Create StreamReader
         Dim SR As StreamReader = New StreamReader(RecipeImportFormulaFilename)
 
         'Reads CSV file into arrays split by ", "
@@ -420,10 +527,20 @@ Public Class Main
 
     'Traverses through all XML files in IB_Import\RecipeXMLImport directory, re-identifying all material IDs using pre-loaded data table.
     Private Sub ModifyXMLImportMaterialsAndSave()
+
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 3
+        CurrentStepDescription = "Modifying Material IDs in XML FIles"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
+
         Dim doc As New XmlDocument
         Dim namespaces As XmlNamespaceManager
 
-        'Must delcare namespaces since they are part of the document...
+        'Must declare namespaces since they are part of the document...
         namespaces = New XmlNamespaceManager(doc.NameTable)
         namespaces.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance")
         namespaces.AddNamespace("a", "http://www.wbf.org/xml/B2MML-V0401")
@@ -436,13 +553,8 @@ Public Class Main
         Dim Modified As String = "False"
 
         'Progress bar
-        ProgressBar1 = New ProgressBar
-        ProgressBar1.Location = New Point(166, 307)
-        ProgressBar1.Minimum = 0
+        ProgressBar1.Value = 0
         ProgressBar1.Maximum = (RecipeImportFormula.Rows.Count + RecipeImportMaterialCrossReference.Rows.Count)
-        ProgressBar1.Width = 362
-        ProgressBar1.Height = 30
-        ProgressBar1.ForeColor = Color.Navy
 
         Me.Controls.Add(ProgressBar1)
         ProgressBar1.BringToFront()
@@ -472,7 +584,7 @@ Public Class Main
                         Modified = "True"
                     Next
 
-                    ProgressBar1.Value = ProgressBar1.Value + 1
+                    ProgressBar1.Value += 1
 
                     Logger(("ModifyXMLParameter" & "," & "RecipeID: " & RecipeID & "," & "ParameterID: " & ParameterID & "," & "OldMaterialID: " & MaterialID & "," & "NewMaterialID: " & NewMaterialID & "," & Modified), "Material")
 
@@ -488,6 +600,15 @@ Public Class Main
 
     'Uses data table and oMaterialDB.AddMaterial method to import new materials
     Private Sub AddMaterials()
+
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 4
+        CurrentStepDescription = "Importing Materials"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
 
         Dim ReturnValue As Integer
         Dim i As Integer = 0
@@ -506,20 +627,30 @@ Public Class Main
                 Logger(("AddMaterials" & "," & "OldMaterialID: & " & row(0) & "," & "NewMaterialID" & row(1) & "," & "," & "," & "False"), "Material")
             End If
 
-            ProgressBar1.Value = ProgressBar1.Value + 1
+            ProgressBar1.Value += 1
         Next
 
         Me.Controls.Remove(ProgressBar1)
+
         MessageBox.Show("There were " & i & " materials successfully added." & vbCrLf & "There were " & j & " materials that failed.")
 
     End Sub
 
-    'Reads in SavedRecipeImport file into datatable to be accessed through memory
+    'Reads in SavedRecipeImport file into DataTable to be accessed through memory
     Private Sub LoadRecipeImportIDCrossReference()
+
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 1
+        CurrentStepDescription = "Loading Recipe Import Cross Reference Into Memory"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
 
         RecipeImportIDCrossReference.Clear()
 
-        'Create Streamreader
+        'Create StreamReader
         Dim SR As StreamReader = New StreamReader(RecipeImportFileName)
 
         'Reads CSV file into arrays split by ", "
@@ -550,10 +681,19 @@ Public Class Main
     'Traverses through all XML files in IB_Import\RecipeXMLImport modifying Recipe ID and the file name
     Private Sub ModifyXMLImportRecipeIDAndSave()
 
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 2
+        CurrentStepDescription = "Modifying Recipe IDs in XML and Saving Files"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
+
         Dim doc As New XmlDocument
         Dim namespaces As XmlNamespaceManager
 
-        'Must delcare namespaces since they are part of the document...
+        'Must declare namespaces since they are part of the document...
         namespaces = New XmlNamespaceManager(doc.NameTable)
         namespaces.AddNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance")
         namespaces.AddNamespace("a", "http://www.wbf.org/xml/B2MML-V0401")
@@ -567,13 +707,9 @@ Public Class Main
 
         Dim Modified As String
 
-        ProgressBar1 = New ProgressBar
-        ProgressBar1.Location = New Point(166, 307)
-        ProgressBar1.Minimum = 0
-        ProgressBar1.Maximum = (Directory.GetFiles(RecipeXMLImportPath, "*.XML", SearchOption.TopDirectoryOnly).Length * 4)
-        ProgressBar1.Width = 362
-        ProgressBar1.Height = 30
-        ProgressBar1.ForeColor = Color.Navy
+        'ProgressBar
+        ProgressBar1.Value = 0
+        ProgressBar1.Maximum = (Directory.GetFiles(RecipeXMLImportPath, "*.XML", SearchOption.TopDirectoryOnly).Length * 2)
 
         Me.Controls.Add(ProgressBar1)
         ProgressBar1.BringToFront()
@@ -588,7 +724,7 @@ Public Class Main
             'Find ID field in XML file
             ID = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:ID", namespaces).InnerText
 
-            'Search for cross reference in datatable
+            'Search for cross reference in DataTable
             Dim NewIDRow() As DataRow = RecipeImportIDCrossReference.Select("ID = '" & ID & "'")
 
             'Write new ID value, save to Config_A with new ID name
@@ -603,13 +739,22 @@ Public Class Main
 
             Logger(("ModiifyXMLRecipeID" & "," & "OldRecipeID: & " & ID & "," & "New RecipeID: " & NewID & "," & Modified), "Recipe")
 
-            ProgressBar1.Value = ProgressBar1.Value + 1
+            ProgressBar1.Value += 1
 
         Next
     End Sub
 
     'Uses oRecipeDB.ImportRecipe to import XML recipe files
     Private Sub ImportRecipes()
+
+        Dim CurrentStepNum As Integer
+        Dim CurrentStepDescription As String
+
+        CurrentStepNum = 3
+        CurrentStepDescription = "Importing Recipes"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
 
         Dim ReturnValue As Integer = 0
 
@@ -620,7 +765,7 @@ Public Class Main
         'Traverse each XML file in Config_A directory, import each file as new Recipe. If already exists, recipe will be overwritten with new file
         For Each f In Directory.GetFiles(RecipeXMLCopyPath, "*.XML", SearchOption.TopDirectoryOnly)
 
-            ReturnValue = oRecipeDB.ImportRecipe(Path.GetFileName(f), 1)
+            ReturnValue = oRecipeDB.ImportRecipeXMLFromFile(Path.GetFullPath(f), 1, "ICC")
 
             If ReturnValue = True Then 'Imported
                 j += 1
@@ -633,13 +778,12 @@ Public Class Main
 
             File.Delete(f)
 
-            ProgressBar1.Value = ProgressBar1.Value + 1
+            ProgressBar1.Value += 1
         Next
-
-        MessageBox.Show("There were " & j & " recipes successfully added." & vbCrLf & "There were " & k & " recipes that failed.")
 
         Me.Controls.Remove(ProgressBar1)
 
+        MessageBox.Show("There were " & j & " recipes successfully added." & vbCrLf & "There were " & k & " recipes that failed.")
 
     End Sub
 
@@ -664,4 +808,5 @@ Public Class Main
         End If
 
     End Sub
+
 End Class
