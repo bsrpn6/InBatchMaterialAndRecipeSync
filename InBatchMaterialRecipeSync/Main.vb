@@ -16,6 +16,7 @@ Public Class Main
     Public RecipeImportFileName As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\SavedRecipeImport.csv"
     Public RecipeImportFormulaFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\SavedRecipeFormulaImport.csv"
     Public RecipeXMLImportPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\RecipeXMLImport"
+    Public RecipeXMLProcessedPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\ProcessedRecipeXMLImport"
     Public RecipeImportLogFilename As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A\IB_Import\RecipeLog.csv"
 
     Dim RecipeXMLCopyPath As String = "C:\Program Files (x86)\Wonderware\InBatch\cfg\Config_A"
@@ -37,6 +38,8 @@ Public Class Main
     'Progress Bars
     Dim ProgressBar1 As ProgressBar
     Dim NumSteps As Integer
+    Dim CurrentStepNum As Integer
+    Dim CurrentStepDescription As String
     Dim StatusMessage As String
 
     'InBatch Host server name
@@ -65,6 +68,12 @@ Public Class Main
             Directory.CreateDirectory(RecipeXMLExportPath)
         End If
 
+        If Not Directory.Exists(RecipeXMLProcessedPath) Then
+            Directory.CreateDirectory(RecipeXMLProcessedPath)
+        End If
+
+
+
         'ProgressBar
         ProgressBar1 = New ProgressBar
         ProgressBar1.Location = New Point(166, 325)
@@ -82,6 +91,7 @@ Public Class Main
 
         'Set number of steps for status message
         NumSteps = 1
+        CurrentStepNum = 0
         StatusTextBox.Text = "STARTING"
 
         'Export materials to CSV file
@@ -101,6 +111,7 @@ Public Class Main
 
         'Set number of steps for status message
         NumSteps = 4
+        CurrentStepNum = 0
         StatusTextBox.Text = "STARTING"
 
         'Export recipes - exports recipe XML files to Config_A folder, writes Recipe Header inforamtion
@@ -130,20 +141,24 @@ Public Class Main
     Private Sub ImportNewMaterialsCmdBtn_Click(sender As Object, e As EventArgs) Handles ImportNewMaterialsCmdBtn.Click
 
         'Set number of steps for status message
-        NumSteps = 4
+        NumSteps = 2
+        CurrentStepNum = 0
         StatusTextBox.Text = "STARTING"
 
         'Load materials cross reference of old ID numbers vs new ID numbers into a DataTable for faster access
         LoadRecipeImportMaterialCrossReference()
 
-        'Load RecipeImportFormula - used strictly for progress bar incrementing at this time
-        LoadRecipeImportFormula()
+        'Progress bar
+        ProgressBar1.Value = 0
+        ProgressBar1.Maximum = (RecipeImportMaterialCrossReference.Rows.Count)
 
-        'Modify XML files
-        ModifyXMLImportMaterialsAndSave()
+        Me.Controls.Add(ProgressBar1)
+        ProgressBar1.BringToFront()
 
         'Perform import.
         AddMaterials()
+
+        Me.Controls.Remove(ProgressBar1)
 
         StatusTextBox.Text = "COMPLETE"
         StatusTextBox.Update()
@@ -159,17 +174,42 @@ Public Class Main
     Private Sub ImportNewRecipesCmdBtn_Click(sender As Object, e As EventArgs) Handles ImportNewRecipesCmdBtn.Click
 
         'Set number of steps for status message
-        NumSteps = 3
+        NumSteps = 6
+        CurrentStepNum = 0
         StatusTextBox.Text = "STARTING"
+
+        'Check if Materia
+        If RecipeImportMaterialCrossReference.Rows.Count = 0 Then
+            NumSteps += 1
+            LoadRecipeImportMaterialCrossReference()
+        End If
 
         'Load recipe cross reference of old ID numbers vs new ID numbers
         LoadRecipeImportIDCrossReference()
 
+        'Load RecipeImportFormula - used strictly for progress bar incrementing at this time
+        LoadRecipeImportFormula()
+
+        'Progress bar
+        ProgressBar1.Value = 0
+        ProgressBar1.Maximum = (RecipeImportFormula.Rows.Count + RecipeImportMaterialCrossReference.Rows.Count + (RecipeImportIDCrossReference.Rows.Count * 2))
+
+        Me.Controls.Add(ProgressBar1)
+        ProgressBar1.BringToFront()
+
         'Modify XML files and save to Config_A folder
         ModifyXMLImportRecipeIDAndSave()
 
+        'Modify XML files
+        ModifyXMLImportMaterialsAndSave()
+
+        'Copy files from IB_Import\ProcessedRecipeXMLImport to Config_A
+        CopyRecipeXMLImport()
+
         'Add new recipes (recipes that don't exist in local export file but do in source)
         ImportRecipes()
+
+        Me.Controls.Remove(ProgressBar1)
 
         StatusTextBox.Text = "COMPLETE"
         StatusTextBox.Update()
@@ -192,10 +232,7 @@ Public Class Main
     'Uses wwMaterialLib.wwMaterial to write material information to CSV file
     Private Sub GetMaterialExport()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 1
+        CurrentStepNum += 1
         CurrentStepDescription = "Exporting Materials To CSV"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -216,7 +253,7 @@ Public Class Main
         End If
 
         'Query for materials of type Ingredient from host
-        oMaterialDB.QueryMaterialsByType(wwMaterialLib.wwMtrlTypeEnum.wwTypeIngredient)
+        oMaterialDB.QueryMaterials()
 
         Mats = oMaterialDB.Materials
         Dim n As Integer = 1
@@ -244,7 +281,9 @@ Public Class Main
 
                 n += 1
 
-                ProgressBar1.Value += 1
+                If ProgressBar1.Value < ProgressBar1.Maximum Then
+                    ProgressBar1.Value += 1
+                End If
             Next
 
         End Using
@@ -256,10 +295,7 @@ Public Class Main
     'Uses oRecipeDB.ExportRecipeXML to export XML files to Config_A directory
     Private Sub ExportRecipes()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 1
+        CurrentStepNum += 1
         CurrentStepDescription = "Exporting Recipes to XML Files"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -307,7 +343,9 @@ Public Class Main
             n += 1
 
             'Increment progress bar
-            ProgressBar1.Value += 1
+            If ProgressBar1.Value < ProgressBar1.Maximum Then
+                ProgressBar1.Value += 1
+            End If
 
         Next
 
@@ -316,10 +354,7 @@ Public Class Main
     'Copies XML files in Config_A directory to IB_Export directory
     Private Sub CopyRecipeXMLExport()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 2
+        CurrentStepNum += 1
         CurrentStepDescription = "Copying XML files from Config_A to IB_Export"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -334,7 +369,9 @@ Public Class Main
                 File.Delete(f)
             End If
 
-            ProgressBar1.Value += 1
+            If ProgressBar1.Value < ProgressBar1.Maximum Then
+                ProgressBar1.Value += 1
+            End If
 
         Next
 
@@ -343,10 +380,7 @@ Public Class Main
     'Traverses through all XML files in IB_Export directory to collect recipe header information, writing to CSV file
     Private Sub WriteExportRecipeFile()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 3
+        CurrentStepNum += 1
         CurrentStepDescription = "Writing Recipe Header Information to CSV"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -378,7 +412,9 @@ Public Class Main
                 outfile.WriteLine(ID & "," & ProductID & "," & ProductName & "," & ApprovedForProduction & "," & Name)
 
                 'Increment progress bar
-                ProgressBar1.Value += 1
+                If ProgressBar1.Value < ProgressBar1.Maximum Then
+                    ProgressBar1.Value += 1
+                End If
 
             Next
 
@@ -388,10 +424,8 @@ Public Class Main
 
     'Traverses through all XML files in IB_Export directory to collect recipe parameter information, writing to CSV file
     Private Sub WriteExportRecipeFormulaFile()
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
 
-        CurrentStepNum = 4
+        CurrentStepNum += 1
         CurrentStepDescription = "Writing Recipe Formula Information to CSV"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -425,7 +459,7 @@ Public Class Main
                 For Each Parameter In Parameters
                     ParameterType = Parameter("ParameterType").InnerText
 
-                    If ParameterType = "ProcessInput" Then
+                    If ParameterType = "ProcessInput" Or ParameterType = "ProcessOutput" Then
                         ParameterId = Parameter("ID").InnerText
                         MaterialID = Parameter("MaterialID").InnerText
                         outfile.WriteLine(ID & "," & ParameterId & "," & ParameterType & "," & MaterialID)
@@ -434,7 +468,9 @@ Public Class Main
                 Next
 
                 'Increment progress bar
-                ProgressBar1.Value += 1
+                If ProgressBar1.Value < ProgressBar1.Maximum Then
+                    ProgressBar1.Value += 1
+                End If
             Next
         End Using
 
@@ -444,10 +480,7 @@ Public Class Main
     'Reads in SavedMaterialImport file into DataTable to be accessed through memory 
     Private Sub LoadRecipeImportMaterialCrossReference()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 1
+        CurrentStepNum += 1
         CurrentStepDescription = "Loading Recipe Header Cross Reference Table Into Memory"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -486,10 +519,7 @@ Public Class Main
     'Reads in SavedRecipeFormulaImport file into DataTable to be accessed through memory 
     Private Sub LoadRecipeImportFormula()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 2
+        CurrentStepNum += 1
         CurrentStepDescription = "Loading Recipe Formula Cross Reference Table Into Memory"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -528,10 +558,7 @@ Public Class Main
     'Traverses through all XML files in IB_Import\RecipeXMLImport directory, re-identifying all material IDs using pre-loaded data table.
     Private Sub ModifyXMLImportMaterialsAndSave()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 3
+        CurrentStepNum += 1
         CurrentStepDescription = "Modifying Material IDs in XML FIles"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -552,21 +579,13 @@ Public Class Main
         Dim NewMaterialID As String = ""
         Dim Modified As String = "False"
 
-        'Progress bar
-        ProgressBar1.Value = 0
-        ProgressBar1.Maximum = (RecipeImportFormula.Rows.Count + RecipeImportMaterialCrossReference.Rows.Count)
-
-        Me.Controls.Add(ProgressBar1)
-        ProgressBar1.BringToFront()
-
         'For each file of type XML copy to copy directory
-        For Each f In Directory.GetFiles(RecipeXMLImportPath, "*.XML", SearchOption.TopDirectoryOnly)
+        For Each f In Directory.GetFiles(RecipeXMLProcessedPath, "*.XML", SearchOption.TopDirectoryOnly)
             doc.Load(f)
 
             RecipeID = doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:ID", namespaces).InnerText
 
             Dim Parameters As XmlNodeList = doc.SelectNodes("/a:BatchInformation/a:MasterRecipe/a:Formula/a:Parameter", namespaces)
-
 
             For Each Parameter In Parameters
                 ParameterType = Parameter("ParameterType").InnerText
@@ -576,15 +595,17 @@ Public Class Main
                     Modified = "False"
 
                     MaterialID = Parameter("MaterialID").InnerText
-                    Dim NewIDRow() As DataRow = RecipeImportMaterialCrossReference.Select("ID = '" & MaterialID & "'")
+                    Dim NewIDRow() As DataRow = RecipeImportFormula.Select("NewID = '" & RecipeID & "' AND ParameterID = '" & ParameterID & "'")
 
                     For Each row As DataRow In NewIDRow
-                        NewMaterialID = row(1)
+                        NewMaterialID = row(4)
                         Parameter("MaterialID").InnerText = NewMaterialID
                         Modified = "True"
                     Next
 
-                    ProgressBar1.Value += 1
+                    If ProgressBar1.Value < ProgressBar1.Maximum Then
+                        ProgressBar1.Value += 1
+                    End If
 
                     Logger(("ModifyXMLParameter" & "," & "RecipeID: " & RecipeID & "," & "ParameterID: " & ParameterID & "," & "OldMaterialID: " & MaterialID & "," & "NewMaterialID: " & NewMaterialID & "," & Modified), "Material")
 
@@ -601,14 +622,14 @@ Public Class Main
     'Uses data table and oMaterialDB.AddMaterial method to import new materials
     Private Sub AddMaterials()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 4
+        CurrentStepNum += 1
         CurrentStepDescription = "Importing Materials"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
         StatusTextBox.Update()
+
+        Dim ErrorCatch? As Boolean
+        Dim ErrorMessage As String
 
         Dim ReturnValue As Integer
         Dim i As Integer = 0
@@ -618,19 +639,30 @@ Public Class Main
         'MatExport is stripped of matching materials in the MaterialsToAdd method
 
         For Each row As DataRow In RecipeImportMaterialCrossReference.Rows
-            ReturnValue = oMaterialDB.AddMaterial(row(1), row(2), row(4), row(3), row(5), Convert.ToDouble(row(6)), Convert.ToDouble(row(7)))
+
+
+            ErrorCatch = False
+            ErrorMessage = ""
+
+            Try
+                ReturnValue = oMaterialDB.AddMaterial(row(1), row(2), row(4), Convert.ToInt32(row(3)), row(5), Convert.ToDouble(row(6)), Convert.ToDouble(row(7)))
+            Catch ex As Exception
+                ErrorCatch = True
+                ErrorMessage = ex.Message
+            End Try
+
             If ReturnValue = 0 Then
                 i += 1
                 Logger(("AddMaterials" & "," & "OldMaterialID: & " & row(0) & "," & "NewMaterialID" & row(1) & "," & "," & "," & "True"), "Material")
             Else
                 j += 1
-                Logger(("AddMaterials" & "," & "OldMaterialID: & " & row(0) & "," & "NewMaterialID" & row(1) & "," & "," & "," & "False"), "Material")
+                Logger(("AddMaterials" & "," & "OldMaterialID: & " & row(0) & "," & "NewMaterialID" & row(1) & If(ErrorCatch = True, "Error: " & ErrorMessage) & "," & "," & "," & "False"), "Material")
             End If
 
-            ProgressBar1.Value += 1
+            If ProgressBar1.Value < ProgressBar1.Maximum Then
+                ProgressBar1.Value += 1
+            End If
         Next
-
-        Me.Controls.Remove(ProgressBar1)
 
         MessageBox.Show("There were " & i & " materials successfully added." & vbCrLf & "There were " & j & " materials that failed.")
 
@@ -639,10 +671,7 @@ Public Class Main
     'Reads in SavedRecipeImport file into DataTable to be accessed through memory
     Private Sub LoadRecipeImportIDCrossReference()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 1
+        CurrentStepNum += 1
         CurrentStepDescription = "Loading Recipe Import Cross Reference Into Memory"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -681,10 +710,7 @@ Public Class Main
     'Traverses through all XML files in IB_Import\RecipeXMLImport modifying Recipe ID and the file name
     Private Sub ModifyXMLImportRecipeIDAndSave()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 2
+        CurrentStepNum += 1
         CurrentStepDescription = "Modifying Recipe IDs in XML and Saving Files"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
@@ -707,13 +733,6 @@ Public Class Main
 
         Dim Modified As String
 
-        'ProgressBar
-        ProgressBar1.Value = 0
-        ProgressBar1.Maximum = (Directory.GetFiles(RecipeXMLImportPath, "*.XML", SearchOption.TopDirectoryOnly).Length * 2)
-
-        Me.Controls.Add(ProgressBar1)
-        ProgressBar1.BringToFront()
-
         'Traverse through all files in IB_Import\RecipeXMLImport
         For Each f In Directory.GetFiles(RecipeXMLImportPath, "*.XML", SearchOption.TopDirectoryOnly)
 
@@ -732,14 +751,17 @@ Public Class Main
                 NewID = row(1)
                 doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:ID", namespaces).InnerText = NewID
                 doc.SelectSingleNode("/a:BatchInformation/a:MasterRecipe/a:Header/a:ProductID", namespaces).InnerText = NewID
-                doc.Save(RecipeXMLCopyPath & "\" & NewID & ".xml")
+                doc.Save(RecipeXMLProcessedPath & "\" & NewID & ".xml")
 
                 Modified = "True"
             Next
 
             Logger(("ModiifyXMLRecipeID" & "," & "OldRecipeID: & " & ID & "," & "New RecipeID: " & NewID & "," & Modified), "Recipe")
 
-            ProgressBar1.Value += 1
+            If ProgressBar1.Value < ProgressBar1.Maximum Then
+                ProgressBar1.Value += 1
+            End If
+
 
         Next
     End Sub
@@ -747,16 +769,15 @@ Public Class Main
     'Uses oRecipeDB.ImportRecipe to import XML recipe files
     Private Sub ImportRecipes()
 
-        Dim CurrentStepNum As Integer
-        Dim CurrentStepDescription As String
-
-        CurrentStepNum = 3
+        CurrentStepNum += 1
         CurrentStepDescription = "Importing Recipes"
 
         StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
         StatusTextBox.Update()
 
         Dim ReturnValue As Integer = 0
+        Dim ErrorCatch? As Boolean
+        Dim ErrorMessage As String
 
         Dim i As Integer = 0
         Dim j As Integer = 0
@@ -765,25 +786,58 @@ Public Class Main
         'Traverse each XML file in Config_A directory, import each file as new Recipe. If already exists, recipe will be overwritten with new file
         For Each f In Directory.GetFiles(RecipeXMLCopyPath, "*.XML", SearchOption.TopDirectoryOnly)
 
-            ReturnValue = oRecipeDB.ImportRecipeXMLFromFile(Path.GetFullPath(f), 1, "ICC")
+            ErrorCatch = False
+            ErrorMessage = ""
+
+            Try
+                ReturnValue = oRecipeDB.ImportRecipeXMLFromFile(Path.GetFullPath(f), 1, "ICC")
+            Catch ex As Exception
+                ErrorCatch = True
+                ErrorMessage = ex.Message
+            End Try
 
             If ReturnValue = True Then 'Imported
                 j += 1
                 Logger(("AddRecipes" & "," & "RecipeID: " & Path.GetFileNameWithoutExtension(f) & "," & "," & "True"), "Recipe")
-            ElseIf ReturnValue = False Then 'Failed
+            ElseIf ReturnValue = False Or ErrorCatch = True Then 'Failed
                 k += 1
-                Logger(("AddRecipes" & "," & "RecipeID: " & Path.GetFileNameWithoutExtension(f) & "," & "," & "False"), "Recipe")
+                Logger(("AddRecipes" & "," & "RecipeID: " & Path.GetFileNameWithoutExtension(f) & If(ErrorCatch = True, "Error: " & ErrorMessage) & "," & "," & "False"), "Recipe")
             End If
             i += 1
 
             File.Delete(f)
 
-            ProgressBar1.Value += 1
+            If ProgressBar1.Value < ProgressBar1.Maximum Then
+                ProgressBar1.Value += 1
+            End If
         Next
 
-        Me.Controls.Remove(ProgressBar1)
-
         MessageBox.Show("There were " & j & " recipes successfully added." & vbCrLf & "There were " & k & " recipes that failed.")
+
+    End Sub
+
+    'Copies XML files in Config_A directory to IB_Export directory
+    Private Sub CopyRecipeXMLImport()
+
+        CurrentStepNum += 1
+        CurrentStepDescription = "Copying XML files from IB_Import\ProcessedRecipeXMLImport to Config_A"
+
+        StatusTextBox.Text = "Step: " & CurrentStepNum.ToString & "/" & NumSteps.ToString & " " & CurrentStepDescription
+        StatusTextBox.Update()
+
+        'For each file of type XML copy to copy directory
+        For Each f In Directory.GetFiles(RecipeXMLProcessedPath, "*.XML", SearchOption.TopDirectoryOnly)
+
+            If File.Exists(f) Then
+                'Copy then delete file
+                File.Copy(f, Path.Combine(RecipeXMLCopyPath, Path.GetFileName(f)), True)
+            End If
+
+            If ProgressBar1.Value < ProgressBar1.Maximum Then
+                ProgressBar1.Value += 1
+            End If
+
+        Next
 
     End Sub
 
