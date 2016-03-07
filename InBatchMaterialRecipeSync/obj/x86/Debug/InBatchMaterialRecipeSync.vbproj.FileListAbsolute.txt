@@ -39,3 +39,16 @@ C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSy
 C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.Main.resources
 C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.Resources.resources
 C:\Users\Admin\Source\Repos\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatchMaterialRecipeSync.vbproj.GenerateResource.Cache
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\bin\x86\Debug\InBatch Sync.exe.config
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\Interop.wwMaterialLib.dll
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatchMaterialRecipeSync.vbproj.ResolveComReference.cache
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\bin\x86\Debug\InBatch Sync.exe
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\bin\x86\Debug\InBatch Sync.pdb
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\bin\x86\Debug\InBatch Sync.xml
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatchMaterialRecipeSync.vbprojResolveAssemblyReference.cache
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.Main.resources
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\WindowsApplication1.Resources.resources
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatchMaterialRecipeSync.vbproj.GenerateResource.Cache
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatch Sync.exe
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatch Sync.xml
+C:\Users\Administrator\Desktop\InBatchMaterialAndRecipeSync\InBatchMaterialAndRecipeSync\InBatchMaterialRecipeSync\obj\x86\Debug\InBatch Sync.pdb

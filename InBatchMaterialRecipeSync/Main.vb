@@ -591,11 +591,15 @@ Public Class Main
                 ParameterType = Parameter("ParameterType").InnerText
                 ParameterID = Parameter("ID").InnerText
 
-                If ParameterType = "ProcessInput" Then
+                If ParameterType = "ProcessInput" Or ParameterType = "ProcessOutput" Then
                     Modified = "False"
 
                     MaterialID = Parameter("MaterialID").InnerText
                     Dim NewIDRow() As DataRow = RecipeImportFormula.Select("NewID = '" & RecipeID & "' AND ParameterID = '" & ParameterID & "'")
+
+                    If RecipeID = "200511733" Then
+                        'MsgBox("TEST")
+                    End If
 
                     For Each row As DataRow In NewIDRow
                         NewMaterialID = row(4)
